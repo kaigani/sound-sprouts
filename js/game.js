@@ -1,0 +1,525 @@
+// game.js — round logic for all three modes. Owns the active tiles, the bench,
+// the shared build mechanic (tap -> speak -> fly to slot -> evaluate), and the
+// celebration / bonus / silly responses. One Game instance at a time.
+
+import {
+  WORDS, ONSETS, RIMES, BONUS_WORDS, FREEPLAY_SETS, PHRASES,
+} from './data.js';
+import {
+  visibleSize, tween, Ease, pick, getCamera,
+} from './scene.js';
+import * as THREE from 'three';
+import {
+  makeTile, setTileHome, startIdle, bounceTile, jiggleTile, flyTo,
+  disposeTile, makeBench, makeCard, setCardContent, popCard, showGoalCard,
+  hideCard,
+} from './tiles.js';
+import * as speech from './speech.js';
+import * as sfx from './sfx.js';
+import { burst } from './confetti.js';
+
+const ANIMAL_EMOJI = new Set([
+  '1f408', '1f987', '1f400', '1f415', '1f98a', '1f437', '1f414', '1f436', '1f41b',
+]);
+
+const BONUS_SET = new Set(BONUS_WORDS);
+const WORD_BY_KEY = new Map(WORDS.map((w) => [w.word, w]));
+
+function rand(arr) { return arr[(Math.random() * arr.length) | 0]; }
+function fill(tpl, vars) {
+  return tpl.replace(/\{(\w+)\}/g, (_, k) => (k in vars ? vars[k] : ''));
+}
+function shuffle(a) {
+  const r = a.slice();
+  for (let i = r.length - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0;
+    [r[i], r[j]] = [r[j], r[i]];
+  }
+  return r;
+}
+function wait(ms) { return new Promise((res) => setTimeout(res, ms)); }
+
+export class Game {
+  /**
+   * @param {'guided'|'mystery'|'freeplay'} mode
+   * @param {object} hud DOM refs { btnSpeaker, btnShuffle, btnAgain, gardenRow }
+   */
+  constructor(mode, hud) {
+    this.mode = mode;
+    this.hud = hud;
+    this.tiles = [];
+    this.bench = null;
+    this.card = null;       // celebration / reveal picture card
+    this.goalCard = null;   // small translucent goal card (guided/mystery)
+    this.idleStop = null;
+    this.lastWord = null;       // avoid immediate repeats (guided/mystery)
+    this.freeplayIndex = -1;    // rotate FREEPLAY_SETS
+    this.found = new Set();     // free play collection
+    this.lastPrompt = [];       // for the 🔊 replay button
+    this.busy = false;          // global input lock during animations
+    this.advanceTimer = null;
+    this.destroyed = false;
+    this.lastResult = null;     // 'word' | 'bonus' | 'silly' | null (debug hook)
+  }
+
+  // ---- lifecycle -----------------------------------------------------
+
+  start() {
+    this.bench = makeBench(this.benchY());
+    this.card = makeCard();
+    if (this.mode !== 'freeplay') this.goalCard = makeCard();
+    this.idleStop = startIdle(this.tiles);
+
+    if (this.mode === 'freeplay') {
+      this.hud.btnShuffle.classList.remove('hidden');
+      this.hud.gardenRow.classList.remove('hidden');
+      this.hud.gardenRow.innerHTML = '';
+      this.dealFreeplay();
+    } else {
+      this.newRound();
+    }
+  }
+
+  destroy() {
+    this.destroyed = true;
+    clearTimeout(this.advanceTimer);
+    speech.stop();
+    if (this.idleStop) this.idleStop();
+    for (const t of this.tiles) disposeTile(t);
+    this.tiles = [];
+    if (this.bench) { this.bench.group.parent && this.bench.group.parent.remove(this.bench.group); }
+    if (this.card) this.card.parent && this.card.parent.remove(this.card);
+    if (this.goalCard) this.goalCard.parent && this.goalCard.parent.remove(this.goalCard);
+    this.hud.btnShuffle.classList.add('hidden');
+    this.hud.btnAgain.classList.add('hidden');
+    this.hud.gardenRow.classList.add('hidden');
+  }
+
+  // ---- layout helpers ------------------------------------------------
+
+  benchY() {
+    // Re-derived from visible-plane math so the bench (and the slots/cards stacked
+    // above it) clear the hill crest with comfortable margin. At -0.22*height the
+    // bench center sits at screen-ndcy ≈ -0.44 (~56% down) and its bottom edge at
+    // ≈ -0.55, safely above the hill crests (ndcy ≈ -0.66 / -0.70).
+    const { height } = visibleSize(0);
+    return -height * 0.22;
+  }
+
+  /** Scale the whole layout group to fit narrow viewports (portrait). */
+  fitScale() {
+    const { width } = visibleSize(0);
+    // we design for ~9 units wide; shrink if the viewport is narrower
+    return Math.min(1, width / 9.2);
+  }
+
+  /** Lay tiles in an arc above the bench. */
+  arcLayout(tiles, baseY, radius = 3.6, spread = 0.5) {
+    const n = tiles.length;
+    const s = this.fitScale();
+    const startA = Math.PI / 2 + (n - 1) * spread / 2;
+    tiles.forEach((tile, i) => {
+      tile.scale.setScalar(s);
+      tile.userData.baseScale = s;
+      const a = startA - i * spread;
+      const x = Math.cos(a) * radius * s;
+      const y = baseY + Math.sin(a) * radius * 0.45 * s;
+      setTileHome(tile, x, y, 0);
+    });
+  }
+
+  // ---- tile factory --------------------------------------------------
+
+  addOnset(letter) {
+    const t = makeTile('onset', letter, ONSETS[letter].spoken);
+    this.tiles.push(t);
+    return t;
+  }
+  addRime(rime) {
+    const t = makeTile('rime', rime, RIMES[rime].spoken);
+    this.tiles.push(t);
+    return t;
+  }
+
+  clearTiles() {
+    for (const t of this.tiles) disposeTile(t);
+    this.tiles = [];
+    if (this.bench) for (const s of this.bench.slots) s.tile = null;
+  }
+
+  // ===================================================================
+  //  GUIDED + MYSTERY round
+  // ===================================================================
+
+  newRound() {
+    this.clearTiles();
+    this.hud.btnAgain.classList.add('hidden');
+    clearTimeout(this.advanceTimer);
+
+    // pick a target word (no immediate repeat)
+    let target;
+    do { target = rand(WORDS); } while (WORDS.length > 1 && target.word === this.lastWord);
+    this.lastWord = target.word;
+    this.target = target;
+
+    // distractors that *also* tend to form real words
+    const distractorOnset = this.pickDistractorOnset(target);
+    const distractorRime = this.pickDistractorRime(target);
+
+    const onsetTile = this.addOnset(target.onset);
+    const rimeTile = this.addRime(target.rime);
+    const dOn = this.addOnset(distractorOnset);
+    const dRi = this.addRime(distractorRime);
+
+    const ordered = shuffle([onsetTile, rimeTile, dOn, dRi]);
+    // radius 4.0 / spread 0.64 keeps a ≥0.4u (landscape) / ≥0.28u (portrait) gap
+    // between adjacent tile edges so 4 tiles never touch, even with idle sway.
+    this.arcLayout(ordered, this.benchY() + 3.2, 4.0, 0.64);
+
+    // goal card
+    const baseY = this.benchY() + 1.9;
+    setCardContent(this.goalCard, {
+      codepoint: target.emoji,
+      char: target.char,
+      word: target.word,
+      onsetLen: target.onset.length,
+      mystery: this.mode === 'mystery',
+    }).then(() => {
+      if (this.destroyed) return;
+      showGoalCard(this.goalCard, 0, baseY, 0.6);
+    });
+
+    // prompt
+    if (this.mode === 'mystery') {
+      this.lastPrompt = [
+        fill(PHRASES.mysteryPrompt[0], {
+          onset: ONSETS[target.onset].spoken,
+          rime: RIMES[target.rime].spoken,
+        }),
+      ];
+    } else {
+      this.lastPrompt = [
+        fill(rand(PHRASES.guidedPrompt), { word: target.word }),
+        `${ONSETS[target.onset].spoken}.`,
+        `${RIMES[target.rime].spoken}.`,
+      ];
+    }
+    this.speakPrompt();
+  }
+
+  pickDistractorOnset(target) {
+    // onsets that form a real picture word with the target's rime (≠ target onset)
+    const candidates = WORDS
+      .filter((w) => w.rime === target.rime && w.onset !== target.onset)
+      .map((w) => w.onset);
+    if (candidates.length) return rand(candidates);
+    const all = Object.keys(ONSETS).filter((o) => o !== target.onset);
+    return rand(all);
+  }
+
+  pickDistractorRime(target) {
+    const candidates = WORDS
+      .filter((w) => w.onset === target.onset && w.rime !== target.rime)
+      .map((w) => w.rime);
+    if (candidates.length) return rand(candidates);
+    const all = Object.keys(RIMES).filter((r) => r !== target.rime);
+    return rand(all);
+  }
+
+  // ===================================================================
+  //  FREE PLAY
+  // ===================================================================
+
+  dealFreeplay() {
+    this.clearTiles();
+    this.hud.btnAgain.classList.add('hidden');
+    this.freeplayIndex = (this.freeplayIndex + 1) % FREEPLAY_SETS.length;
+    const set = FREEPLAY_SETS[this.freeplayIndex];
+
+    const onsetTiles = set.onsets.map((o) => this.addOnset(o));
+    const rimeTiles = set.rimes.map((r) => this.addRime(r));
+
+    const s = this.fitScale();
+    // top arc: 4 onsets
+    this.rowLayout(onsetTiles, this.benchY() + 4.2, s, 2.0);
+    // lower arc: 3 rimes
+    this.rowLayout(rimeTiles, this.benchY() + 2.4, s, 2.0);
+
+    this.lastPrompt = ['Mix the sounds! What can you make?'];
+    this.speakPrompt();
+  }
+
+  rowLayout(tiles, y, s, gap = 2.0) {
+    const n = tiles.length;
+    const totalW = (n - 1) * gap * s;
+    tiles.forEach((tile, i) => {
+      tile.scale.setScalar(s);
+      tile.userData.baseScale = s;
+      const x = -totalW / 2 + i * gap * s;
+      setTileHome(tile, x, y, 0);
+    });
+  }
+
+  // ===================================================================
+  //  Prompt / speaker
+  // ===================================================================
+
+  speakPrompt() {
+    if (!this.lastPrompt.length) return;
+    speech.speakSeq(this.lastPrompt, { rate: 0.8, pitch: 1.05, gap: 280 });
+  }
+
+  // ===================================================================
+  //  Input — pointerdown raycast
+  // ===================================================================
+
+  /** Called by main.js on pointerdown over the canvas. */
+  onPointer(clientX, clientY) {
+    if (this.busy) return;
+    const hit = pick(clientX, clientY, this.tiles);
+    if (!hit) return;
+    const d = hit.userData;
+    if (d.busy) return;
+
+    if (d.slotted) {
+      this.unslot(hit);
+    } else {
+      this.slot(hit);
+    }
+  }
+
+  /** Move a tile into its type's slot. */
+  async slot(tile) {
+    const d = tile.userData;
+    const slotIndex = d.type === 'onset' ? 0 : 1;
+    const slot = this.bench.slots[slotIndex];
+
+    // if that slot already holds a different tile, pop the old one back first
+    if (slot.tile && slot.tile !== tile) {
+      await this.popOut(slot.tile, false);
+    }
+
+    this.busy = true;
+    d.busy = true; // pause idle so the bounce isn't overwritten
+    sfx.pop();
+    await bounceTile(tile);
+    speech.speak(d.spoken, { rate: 0.85, pitch: 1.1 });
+    sfx.whoosh();
+    d.slotted = true;
+    slot.tile = tile;
+    await flyTo(tile, slot.world.x, slot.world.y, slot.world.z); // flyTo clears d.busy
+    this.busy = false;
+
+    if (this.bench.slots[0].tile && this.bench.slots[1].tile) {
+      this.evaluate();
+    }
+  }
+
+  /** Tap a slotted tile -> pop it back out to the arc. */
+  async unslot(tile) {
+    await this.popOut(tile, true);
+  }
+
+  async popOut(tile, speakIt) {
+    const d = tile.userData;
+    this.busy = true;
+    const slotIndex = d.type === 'onset' ? 0 : 1;
+    if (this.bench.slots[slotIndex].tile === tile) this.bench.slots[slotIndex].tile = null;
+    d.slotted = false;
+    if (speakIt) {
+      sfx.unpop();
+      speech.speak(d.spoken, { rate: 0.85, pitch: 1.1 });
+    }
+    await flyTo(tile, d.home.x, d.home.y, d.home.z);
+    this.busy = false;
+  }
+
+  // ===================================================================
+  //  Evaluate the built word
+  // ===================================================================
+
+  async evaluate() {
+    const left = this.bench.slots[0].tile;
+    const right = this.bench.slots[1].tile;
+    if (!left || !right) return;
+    const blend = left.userData.text + right.userData.text;
+
+    this.busy = true;
+
+    if (WORD_BY_KEY.has(blend)) {
+      this.lastResult = 'word';
+      await this.celebrate(WORD_BY_KEY.get(blend), left, right);
+    } else if (BONUS_SET.has(blend)) {
+      this.lastResult = 'bonus';
+      await this.bonus(blend, left, right);
+    } else {
+      this.lastResult = 'silly';
+      await this.silly(blend, left, right);
+    }
+  }
+
+  /** Picture word found. */
+  async celebrate(wordObj, left, right) {
+    // slide the two tiles together to "touch"
+    await Promise.all([
+      tween(left.position, { x: -0.85 }, 220, Ease.inOut),
+      tween(right.position, { x: 0.85 }, 220, Ease.inOut),
+    ]);
+    await speech.speak(wordObj.word, { rate: 0.7, pitch: 1.05 });
+
+    sfx.tada();
+    const cardY = this.benchY() + 2.6;
+    burst({ x: 0, y: cardY, z: 1 }, { count: 130, power: this.mode === 'mystery' ? 1.25 : 1 });
+
+    if (this.goalCard) hideCard(this.goalCard);
+
+    await setCardContent(this.card, {
+      codepoint: wordObj.emoji,
+      char: wordObj.char,
+      word: wordObj.word,
+      onsetLen: wordObj.onset.length,
+      mystery: false,
+    });
+    if (this.destroyed) return;
+    await popCard(this.card, 0, cardY, 1.0, this.mode === 'mystery' ? 1.05 : 1);
+
+    if (ANIMAL_EMOJI.has(wordObj.emoji)) sfx.boing();
+    speech.speak(fill(rand(PHRASES.celebrate), { word: wordObj.word }), { rate: 0.85, pitch: 1.1 });
+
+    if (this.mode === 'freeplay') {
+      this.addToGarden(wordObj);
+      // free play: dismiss on tap (handled in main via card pick) or after a beat
+      this.busy = false;
+      this.awaitFreeplayDismiss();
+    } else {
+      this.showAgain();
+      // auto-advance after ~6s
+      this.advanceTimer = setTimeout(() => {
+        if (!this.destroyed) this.again();
+      }, 6000);
+      this.busy = false;
+    }
+  }
+
+  /** Bonus (real, no picture) word found. */
+  async bonus(blend, left, right) {
+    sfx.sparkle();
+    const y = this.benchY() + 2.4;
+    burst({ x: 0, y, z: 1 }, { count: 50, gold: true, spread: 0.7 });
+    await speech.speak(blend, { rate: 0.75, pitch: 1.1 });
+    speech.speak(fill(rand(PHRASES.bonus), { word: blend }), { rate: 0.85, pitch: 1.1 });
+    await wait(700);
+    await this.returnTiles(left, right);
+    this.busy = false;
+  }
+
+  /** Not a word — silly, warm response. */
+  async silly(blend, left, right) {
+    sfx.silly();
+    await Promise.all([jiggleTile(left), jiggleTile(right)]);
+    await speech.speak(blend, { rate: 0.7, pitch: 1.0 });
+    speech.speak(fill(rand(PHRASES.silly), { blend }), { rate: 0.85, pitch: 1.1 });
+    await wait(400);
+    await this.returnTiles(left, right);
+    this.busy = false;
+  }
+
+  /** Send both bench tiles back to their arc homes. */
+  async returnTiles(left, right) {
+    for (const t of [left, right]) {
+      const slotIndex = t.userData.type === 'onset' ? 0 : 1;
+      if (this.bench.slots[slotIndex].tile === t) this.bench.slots[slotIndex].tile = null;
+      t.userData.slotted = false;
+    }
+    await Promise.all([
+      flyTo(left, left.userData.home.x, left.userData.home.y, left.userData.home.z),
+      flyTo(right, right.userData.home.x, right.userData.home.y, right.userData.home.z),
+    ]);
+  }
+
+  // ---- free play card dismiss + collection ---------------------------
+
+  awaitFreeplayDismiss() {
+    // tapping anywhere (handled in main as a fallback) or the tiles dismisses.
+    // We expose a flag main.js checks; simplest: auto-return after a short window
+    // but ALSO allow immediate dismissal via dismissCard().
+    this.freeplayCardUp = true;
+  }
+
+  /** main.js calls this on any pointer while a free-play card is showing. */
+  async dismissCard() {
+    if (!this.freeplayCardUp || this.busy) return;
+    this.freeplayCardUp = false;
+    this.busy = true;
+    await hideCard(this.card);
+    const left = this.bench.slots[0].tile;
+    const right = this.bench.slots[1].tile;
+    if (left && right) await this.returnTiles(left, right);
+    this.busy = false;
+  }
+
+  addToGarden(wordObj) {
+    if (this.found.has(wordObj.word)) return;
+    this.found.add(wordObj.word);
+    const el = document.createElement('div');
+    el.className = 'garden-card';
+    el.textContent = wordObj.char || '⭐';
+    this.hud.gardenRow.appendChild(el);
+    // keep the strip from overflowing: drop oldest beyond ~10
+    while (this.hud.gardenRow.children.length > 12) {
+      this.hud.gardenRow.removeChild(this.hud.gardenRow.firstChild);
+    }
+  }
+
+  // ---- Again / replay -------------------------------------------------
+
+  showAgain() {
+    this.hud.btnAgain.classList.remove('hidden');
+  }
+
+  /** Advance to the next round (guided/mystery) — hide card, new round. */
+  async again() {
+    clearTimeout(this.advanceTimer);
+    this.hud.btnAgain.classList.add('hidden');
+    this.busy = true;
+    await hideCard(this.card);
+    this.busy = false;
+    this.newRound();
+  }
+
+  // ---- Read-only debug snapshot (window.SPROUTS) ----------------------
+
+  /** Current mode + slotted fragment ids + last evaluation result. */
+  debugState() {
+    const slots = this.bench ? this.bench.slots : [null, null];
+    return {
+      mode: this.mode,
+      slots: {
+        onset: slots[0] && slots[0].tile ? slots[0].tile.userData.text : null,
+        rime: slots[1] && slots[1].tile ? slots[1].tile.userData.text : null,
+      },
+      lastResult: this.lastResult,
+    };
+  }
+
+  /**
+   * Project every active, tappable (non-slotted) tile center to CSS pixel canvas
+   * coordinates. Returns [{ label, type, x, y }].
+   */
+  debugTileXY() {
+    const cam = getCamera();
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const v = new THREE.Vector3();
+    return this.tiles.map((t) => {
+      t.getWorldPosition(v);
+      v.project(cam);
+      return {
+        label: t.userData.text,
+        type: t.userData.type,
+        x: (v.x * 0.5 + 0.5) * w,
+        y: (-v.y * 0.5 + 0.5) * h,
+      };
+    });
+  }
+}

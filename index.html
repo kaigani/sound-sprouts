@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#FFF7E8" />
+  <title>Sound Sprouts 🌱</title>
+
+  <link rel="stylesheet" href="./css/style.css" />
+
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js" } }
+  </script>
+</head>
+<body>
+  <!-- three.js renders into this; it sits behind every DOM layer -->
+  <canvas id="scene" touch-action="none"></canvas>
+
+  <!-- ===== Menu overlay ===== -->
+  <div id="menu" class="overlay">
+    <h1 class="title">Sound Sprouts <span class="sprout">🌱</span></h1>
+    <div class="menu-buttons">
+      <button class="big-button" data-mode="guided">
+        <span class="bb-icon">🎯</span>
+        <span class="bb-label">Make a Word</span>
+      </button>
+      <button class="big-button" data-mode="mystery">
+        <span class="bb-icon">❓</span>
+        <span class="bb-label">Mystery Picture</span>
+      </button>
+      <button class="big-button" data-mode="freeplay">
+        <span class="bb-icon">🎨</span>
+        <span class="bb-label">Word Mixer</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== In-game HUD ===== -->
+  <div id="hud" class="hidden">
+    <button id="btn-home" class="hud-button" aria-label="Home">🏠</button>
+    <button id="btn-speaker" class="hud-button hud-bottom-left" aria-label="Hear it again">🔊</button>
+    <button id="btn-shuffle" class="hud-button hud-bottom-right hidden" aria-label="New tiles">🔀</button>
+    <button id="btn-again" class="again-button hidden" aria-label="Again">▶</button>
+  </div>
+
+  <!-- garden row: session collection of found picture words (free play) -->
+  <div id="garden-row" class="hidden"></div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
