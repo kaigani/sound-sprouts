@@ -20,7 +20,8 @@ attribution applies. The runtime makes no network calls to any model or service.
 |---|---|---|---|---|---|
 | Letter tiles (`assets/gen/tiles/*.png`, 56) | Qwen Image Edit 2509 (local) | Generated for this project | Original work — project-owned | No | Blue onset / orange rime glossy tiles (19 onsets + 37 rimes), edited from a single seed tile per color |
 | Object picture cards (`assets/gen/objects/*.png`, 133 + `mystery.png`) | Qwen Image Edit 2509 (local) | Generated for this project | Original work — project-owned | No | Consistent toy-style objects; nouns plus verbs/adjectives drawn as simple scenes; one shared reference style |
-| HUD buttons (`assets/gen/ui/btn-*.png`) | Qwen Image Edit 2509 (local) | Generated for this project | Original work — project-owned | No | Home, speaker, shuffle, play |
+| HUD buttons (`assets/gen/ui/btn-*.png`) | Concept art (home/sound) + Qwen Image Edit (shuffle/play), local | Generated for this project | Original work — project-owned | No | Ringed glossy style: orange home, blue sound, purple shuffle, green play |
+| Splash/menu UI kit (`assets/gen/ui/splash/*.png`) | Provided by project owner; keyed + composited locally | Project owner | Original work — project-owned | No | Title, three pill button shapes, three text labels, three icons (ABC blocks, peeking cat, bowl of letters); background keyed out and buttons composited for the menu |
 | Background plate (`assets/gen/bg.jpg`) | Qwen Image Edit 2509 (local) | Generated for this project | Original work — project-owned | No | Garden scene + podium stage |
 | Voice clips (`assets/audio/**`, 463 + `manifest.json`) | Qwen3 TTS voice-design + voice-clone (local) | Generated for this project | Original work — project-owned | No | One consistent warm preschool-teacher voice; 56 fragments, 133 words, 133 celebrations, 133 prompts, 8 misc; QA round-tripped with Whisper |
 

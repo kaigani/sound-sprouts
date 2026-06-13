@@ -84,70 +84,58 @@ html, body {
   pointer-events: auto;
 }
 
-.title {
-  margin: 0;
-  font-size: clamp(40px, 9vw, 96px);
-  font-weight: 600;
-  color: var(--brown);
-  text-align: center;
-  text-shadow: 0 3px 0 rgba(255, 255, 255, 0.7), 0 6px 14px rgba(74, 47, 31, 0.18);
-  letter-spacing: 0.5px;
+.title-img {
+  display: block;
+  width: min(82vw, 640px);
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  animation: titleBob 3.6s ease-in-out infinite;
 }
 
-.sprout {
-  display: inline-block;
-  animation: sway 3s ease-in-out infinite;
-}
-
-@keyframes sway {
-  0%, 100% { transform: rotate(-6deg); }
-  50%      { transform: rotate(6deg); }
+@keyframes titleBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
 }
 
 .menu-buttons {
   display: flex;
   flex-direction: column;
-  gap: 3vh;
-  width: min(90vw, 520px);
+  align-items: center;
+  gap: 2.4vh;
+  width: min(86vw, 560px);
 }
 
-/* landscape: lay the three menu buttons out in a row */
-@media (orientation: landscape) and (max-height: 560px) {
-  .menu-buttons {
-    flex-direction: row;
-    width: min(96vw, 980px);
-    gap: 2.5vw;
-  }
+/* landscape: cap by height so all three stacked buttons + title always fit */
+@media (orientation: landscape) {
+  .title-img   { width: min(70vh, 640px); }
+  .menu-buttons { width: min(62vh, 560px); }
 }
 
 .big-button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex: 1 1 0;
-  min-height: 120px;
-  padding: 24px 18px;
+  display: block;
+  width: 100%;
+  padding: 0;
   border: none;
-  border-radius: 32px;
-  background: #ffffff;
-  color: var(--brown);
-  font-family: var(--font);
-  font-weight: 600;
+  background: none;
   cursor: pointer;
-  box-shadow: 0 8px 0 rgba(74, 47, 31, 0.12), 0 14px 28px rgba(74, 47, 31, 0.16);
-  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+  -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  transition: transform 0.09s ease-out, filter 0.09s ease-out;
+}
+
+.big-button img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 7px 12px rgba(74, 47, 31, 0.22));
 }
 
 .big-button:active {
-  transform: translateY(4px);
-  box-shadow: 0 4px 0 rgba(74, 47, 31, 0.12), 0 8px 16px rgba(74, 47, 31, 0.16);
+  transform: translateY(4px) scale(0.99);
 }
-
-.bb-icon  { font-size: clamp(44px, 8vw, 72px); line-height: 1; }
-.bb-label { font-size: clamp(22px, 4vw, 34px); }
 
 /* ===================== In-game HUD ===================== */
 
