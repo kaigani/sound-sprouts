@@ -21,6 +21,7 @@ const hud = {
 
 let game = null;
 let audioUnlocked = false;
+let starting = false; // guards against rapid menu taps spawning multiple games
 
 // Wait for the font so canvas-texture letters render in Fredoka (if available).
 // We never block forever — fonts.ready resolves even when the file is missing
@@ -58,6 +59,7 @@ function showMenu() {
     game.destroy();
     game = null;
   }
+  starting = false;
   speech.stop();
   audio.stop();
   menu.classList.remove('hidden');
@@ -65,6 +67,8 @@ function showMenu() {
 }
 
 function startMode(mode) {
+  if (starting || game) return; // one game at a time
+  starting = true;
   menu.classList.add('hidden');
   hudRoot.classList.remove('hidden');
   hud.btnAgain.classList.add('hidden');
@@ -93,7 +97,11 @@ hud.btnHome.addEventListener('click', () => {
   showMenu();
 });
 
+let lastSpeak = 0;
 hud.btnSpeaker.addEventListener('click', () => {
+  const now = performance.now();
+  if (now - lastSpeak < 600) return; // debounce rapid replay taps
+  lastSpeak = now;
   sfx.tick();
   if (game) game.speakPrompt();
 });

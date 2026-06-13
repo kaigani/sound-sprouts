@@ -5,9 +5,10 @@
 import * as THREE from 'three';
 import { getScene, tween, Ease, onFrame } from './scene.js';
 
-// Palette (matches SPEC / data.js)
-const CORAL = '#FF8A66';
-const LEAF = '#7ECB66';
+// Palette (matches SPEC / data.js). Saturated, "toyetic" letter colors that pop
+// on the white picture card.
+const CORAL = '#FF5A2B';
+const LEAF = '#43BE2E';
 const FONT_STACK = "'Fredoka', 'Arial Rounded MT Bold', sans-serif";
 
 const TILE_W = 1.6;
@@ -159,16 +160,17 @@ export function makeBench(y = -2.6) {
   for (let i = 0; i < 2; i++) {
     const panel = new THREE.Mesh(
       new THREE.PlaneGeometry(slotSize, slotSize),
-      new THREE.MeshBasicMaterial({ map: slotTex, transparent: true, opacity: 0.5, depthWrite: false })
+      new THREE.MeshBasicMaterial({ map: slotTex, transparent: true, opacity: 0.26, depthWrite: false })
     );
     panel.position.set(slotX[i], 0, 0.02);
     panel.renderOrder = 1;
     group.add(panel);
 
     // World drop position for slot/flyTo logic. z slightly forward so a slotted
-    // tile sits just in front of the translucent panel.
+    // tile sits just in front of the translucent panel. `panel` is hidden while a
+    // tile occupies the slot so there's no "box around the tile" when they meet.
     const world = new THREE.Vector3(slotX[i], y, 0.2);
-    slots.push({ index: i, world, tile: null });
+    slots.push({ index: i, world, tile: null, panel });
   }
 
   group.position.set(0, y, 0);

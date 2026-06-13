@@ -54,6 +54,7 @@ export class Game {
     this.found = new Set();     // free play collection
     this.prompt = null;         // current prompt descriptor (for the 🔊 replay button)
     this.busy = false;          // global input lock during animations
+    this.awaitingAgain = false; // round solved, showing result, waiting for Again
     this.advanceTimer = null;
     this.destroyed = false;
     this.lastResult = null;     // 'word' | 'bonus' | 'silly' | null (debug hook)
@@ -143,7 +144,8 @@ export class Game {
   clearTiles() {
     for (const t of this.tiles) disposeTile(t);
     this.tiles = [];
-    if (this.bench) for (const s of this.bench.slots) s.tile = null;
+    this.awaitingAgain = false;
+    if (this.bench) for (const s of this.bench.slots) { s.tile = null; if (s.panel) s.panel.visible = true; }
   }
 
   // ===================================================================
@@ -228,6 +230,9 @@ export class Game {
   // ===================================================================
 
   dealFreeplay() {
+    // ignore shuffle while a tile is animating or a found-word card is up, so
+    // rapid taps can't dispose tiles mid-flight or strand a card
+    if (this.busy || this.freeplayCardUp) return;
     this.clearTiles();
     this.hud.btnAgain.classList.add('hidden');
     this.freeplayIndex = (this.freeplayIndex + 1) % FREEPLAY_SETS.length;
@@ -284,7 +289,9 @@ export class Game {
 
   /** Called by main.js on pointerdown over the canvas. */
   onPointer(clientX, clientY) {
-    if (this.busy) return;
+    // Ignore taps during any animation OR while a solved round is showing its
+    // result (so rapid taps can't pop a tile out mid-celebration).
+    if (this.busy || this.awaitingAgain) return;
     const hit = pick(clientX, clientY, this.tiles);
     if (!hit) return;
     const d = hit.userData;
@@ -316,6 +323,7 @@ export class Game {
     sfx.whoosh();
     d.slotted = true;
     slot.tile = tile;
+    if (slot.panel) slot.panel.visible = false; // no ghost box around a filled slot
     await flyTo(tile, slot.world.x, slot.world.y, slot.world.z); // flyTo clears d.busy
     this.busy = false;
 
@@ -333,7 +341,8 @@ export class Game {
     const d = tile.userData;
     this.busy = true;
     const slotIndex = d.type === 'onset' ? 0 : 1;
-    if (this.bench.slots[slotIndex].tile === tile) this.bench.slots[slotIndex].tile = null;
+    const sl = this.bench.slots[slotIndex];
+    if (sl.tile === tile) { sl.tile = null; if (sl.panel) sl.panel.visible = true; }
     d.slotted = false;
     if (speakIt) {
       sfx.unpop();
@@ -404,6 +413,7 @@ export class Game {
       this.busy = false;
       this.awaitFreeplayDismiss();
     } else {
+      this.awaitingAgain = true;   // lock tile input; only Again/auto-advance proceeds
       this.showAgain();
       // auto-advance after ~6s
       this.advanceTimer = setTimeout(() => {
@@ -451,7 +461,8 @@ export class Game {
   async returnTiles(left, right) {
     for (const t of [left, right]) {
       const slotIndex = t.userData.type === 'onset' ? 0 : 1;
-      if (this.bench.slots[slotIndex].tile === t) this.bench.slots[slotIndex].tile = null;
+      const sl = this.bench.slots[slotIndex];
+      if (sl.tile === t) { sl.tile = null; if (sl.panel) sl.panel.visible = true; }
       t.userData.slotted = false;
     }
     await Promise.all([
@@ -500,12 +511,18 @@ export class Game {
     this.hud.btnAgain.classList.remove('hidden');
   }
 
-  /** Advance to the next round (guided/mystery) — hide card, new round. */
+  /** Advance to the next round (guided/mystery) — hide card, new round.
+   *  Re-entrancy guarded: rapid Again taps and the auto-advance timer can both
+   *  call this, but only the first proceeds. */
   async again() {
-    clearTimeout(this.advanceTimer);
-    this.hud.btnAgain.classList.add('hidden');
+    if (this.busy || !this.awaitingAgain) return;
     this.busy = true;
+    this.awaitingAgain = false;
+    clearTimeout(this.advanceTimer);
+    this.advanceTimer = null;
+    this.hud.btnAgain.classList.add('hidden');
     await hideCard(this.card);
+    if (this.destroyed) return;
     this.busy = false;
     this.newRound();
   }
