@@ -4,6 +4,10 @@ A gentle ThreeJS phonics word-builder for a 4-year-old. Tap big sound tiles,
 hear each sound spoken, blend them into a word, hear the word, see a picture,
 get confetti. No score, no failure, no reading required to play.
 
+**133 illustrated CVC words** across all five short vowels (19 beginning sounds ×
+37 ending chunks), every one with its own custom picture — nouns plus verbs and
+adjectives drawn as little scenes (run, hug, wet, big, sad).
+
 Designed and tuned for **iPad Safari** (huge touch targets, immediate audio +
 visual feedback on every tap), and works on desktop browsers too.
 
@@ -43,7 +47,7 @@ https://kaigani.github.io/sound-sprouts/
 - ThreeJS (vendored locally) draws the glossy letter tiles and picture cards over
   an illustrated garden background with a podium stage.
 - **A consistent warm "preschool teacher" voice** speaks every sound, word, and
-  encouragement — 176 short clips in `assets/audio/`, played from a small
+  encouragement — 463 short clips in `assets/audio/`, played from a small
   `manifest.json`. The only thing not pre-recorded is the playful nonsense blend
   in Silly mode (arbitrary syllables), which uses the device Web Speech voice;
   Web Speech is also the automatic fallback if any clip is missing.

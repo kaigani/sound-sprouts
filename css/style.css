@@ -50,7 +50,7 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-image: url('../assets/gen/bg.png');
+  background-image: url('../assets/gen/bg.jpg');
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;

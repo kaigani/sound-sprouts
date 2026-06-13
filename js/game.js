@@ -19,10 +19,6 @@ import * as audio from './audio.js';
 import * as sfx from './sfx.js';
 import { burst } from './confetti.js';
 
-const ANIMAL_EMOJI = new Set([
-  '1f408', '1f987', '1f400', '1f415', '1f98a', '1f437', '1f414', '1f436', '1f41b',
-]);
-
 const BONUS_SET = new Set(BONUS_WORDS);
 const WORD_BY_KEY = new Map(WORDS.map((w) => [w.word, w]));
 
@@ -396,7 +392,7 @@ export class Game {
     if (this.destroyed) return;
     await popCard(this.card, 0, cardY, 1.0, this.mode === 'mystery' ? 1.05 : 1);
 
-    if (ANIMAL_EMOJI.has(wordObj.emoji)) sfx.boing();
+    if (wordObj.animal) sfx.boing();
     audio.play('celebrate', wordObj.word, {
       fallbackText: fill(rand(PHRASES.celebrate), { word: wordObj.word }),
       rate: 0.85, pitch: 1.1,
@@ -422,12 +418,14 @@ export class Game {
     sfx.sparkle();
     const y = this.benchY() + 2.4;
     burst({ x: 0, y, z: 1 }, { count: 50, gold: true, spread: 0.7 });
-    // the bonus clip already says the word + phrase ("Mat! That's a real word too!")
-    await audio.play('bonus', blend, {
+    // bonus words have no picture and no per-word recording — voice the specific
+    // word via TTS, then play the recorded generic "real word!" praise on top.
+    await speech.speak(blend, { rate: 0.8, pitch: 1.1 });
+    await audio.play('misc', 'realword', {
       fallbackText: fill(rand(PHRASES.bonus), { word: blend }),
       rate: 0.85, pitch: 1.1,
     });
-    await wait(700);
+    await wait(500);
     await this.returnTiles(left, right);
     this.busy = false;
   }
