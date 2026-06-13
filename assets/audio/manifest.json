@@ -1,0 +1,718 @@
+{
+  "fragments": {
+    "ag": {
+      "file": "fragments/ag.m4a",
+      "dur": 1.44
+    },
+    "an": {
+      "file": "fragments/an.m4a",
+      "dur": 0.48
+    },
+    "ap": {
+      "file": "fragments/ap.m4a",
+      "dur": 1.2
+    },
+    "at": {
+      "file": "fragments/at.m4a",
+      "dur": 0.88
+    },
+    "b": {
+      "file": "fragments/b.m4a",
+      "dur": 0.64
+    },
+    "c": {
+      "file": "fragments/c.m4a",
+      "dur": 1.04
+    },
+    "d": {
+      "file": "fragments/d.m4a",
+      "dur": 0.64
+    },
+    "eb": {
+      "file": "fragments/eb.m4a",
+      "dur": 1.04
+    },
+    "ed": {
+      "file": "fragments/ed.m4a",
+      "dur": 0.16
+    },
+    "en": {
+      "file": "fragments/en.m4a",
+      "dur": 0.64
+    },
+    "et": {
+      "file": "fragments/et.m4a",
+      "dur": 0.24
+    },
+    "f": {
+      "file": "fragments/f.m4a",
+      "dur": 0.64
+    },
+    "h": {
+      "file": "fragments/h.m4a",
+      "dur": 0.8
+    },
+    "ig": {
+      "file": "fragments/ig.m4a",
+      "dur": 1.2
+    },
+    "in": {
+      "file": "fragments/in.m4a",
+      "dur": 5.59
+    },
+    "j": {
+      "file": "fragments/j.m4a",
+      "dur": 1.36
+    },
+    "l": {
+      "file": "fragments/l.m4a",
+      "dur": 0.64
+    },
+    "m": {
+      "file": "fragments/m.m4a",
+      "dur": 0.8
+    },
+    "n": {
+      "file": "fragments/n.m4a",
+      "dur": 0.72
+    },
+    "og": {
+      "file": "fragments/og.m4a",
+      "dur": 1.44
+    },
+    "ox": {
+      "file": "fragments/ox.m4a",
+      "dur": 0.8
+    },
+    "p": {
+      "file": "fragments/p.m4a",
+      "dur": 0.72
+    },
+    "r": {
+      "file": "fragments/r.m4a",
+      "dur": 0.8
+    },
+    "s": {
+      "file": "fragments/s.m4a",
+      "dur": 0.8
+    },
+    "t": {
+      "file": "fragments/t.m4a",
+      "dur": 1.36
+    },
+    "ug": {
+      "file": "fragments/ug.m4a",
+      "dur": 0.8
+    },
+    "un": {
+      "file": "fragments/un.m4a",
+      "dur": 0.8
+    },
+    "up": {
+      "file": "fragments/up.m4a",
+      "dur": 0.8
+    },
+    "us": {
+      "file": "fragments/us.m4a",
+      "dur": 0.48
+    },
+    "v": {
+      "file": "fragments/v.m4a",
+      "dur": 0.64
+    },
+    "w": {
+      "file": "fragments/w.m4a",
+      "dur": 0.8
+    }
+  },
+  "words": {
+    "bag": {
+      "file": "words/bag.m4a",
+      "dur": 0.56
+    },
+    "bat": {
+      "file": "words/bat.m4a",
+      "dur": 0.48
+    },
+    "bed": {
+      "file": "words/bed.m4a",
+      "dur": 0.8
+    },
+    "box": {
+      "file": "words/box.m4a",
+      "dur": 0.64
+    },
+    "bug": {
+      "file": "words/bug.m4a",
+      "dur": 0.64
+    },
+    "bus": {
+      "file": "words/bus.m4a",
+      "dur": 0.56
+    },
+    "cap": {
+      "file": "words/cap.m4a",
+      "dur": 0.56
+    },
+    "cat": {
+      "file": "words/cat.m4a",
+      "dur": 0.48
+    },
+    "cup": {
+      "file": "words/cup.m4a",
+      "dur": 0.56
+    },
+    "dog": {
+      "file": "words/dog.m4a",
+      "dur": 0.64
+    },
+    "fox": {
+      "file": "words/fox.m4a",
+      "dur": 0.8
+    },
+    "hat": {
+      "file": "words/hat.m4a",
+      "dur": 1.04
+    },
+    "hen": {
+      "file": "words/hen.m4a",
+      "dur": 0.8
+    },
+    "jet": {
+      "file": "words/jet.m4a",
+      "dur": 0.56
+    },
+    "log": {
+      "file": "words/log.m4a",
+      "dur": 0.64
+    },
+    "man": {
+      "file": "words/man.m4a",
+      "dur": 0.64
+    },
+    "map": {
+      "file": "words/map.m4a",
+      "dur": 0.56
+    },
+    "net": {
+      "file": "words/net.m4a",
+      "dur": 0.64
+    },
+    "pan": {
+      "file": "words/pan.m4a",
+      "dur": 1.04
+    },
+    "pen": {
+      "file": "words/pen.m4a",
+      "dur": 0.8
+    },
+    "pig": {
+      "file": "words/pig.m4a",
+      "dur": 0.48
+    },
+    "pin": {
+      "file": "words/pin.m4a",
+      "dur": 0.8
+    },
+    "pup": {
+      "file": "words/pup.m4a",
+      "dur": 0.8
+    },
+    "rat": {
+      "file": "words/rat.m4a",
+      "dur": 0.48
+    },
+    "run": {
+      "file": "words/run.m4a",
+      "dur": 0.8
+    },
+    "sun": {
+      "file": "words/sun.m4a",
+      "dur": 1.44
+    },
+    "ten": {
+      "file": "words/ten.m4a",
+      "dur": 1.12
+    },
+    "van": {
+      "file": "words/van.m4a",
+      "dur": 0.72
+    },
+    "web": {
+      "file": "words/web.m4a",
+      "dur": 0.72
+    }
+  },
+  "celebrate": {
+    "bag": {
+      "file": "celebrate/bag.m4a",
+      "dur": 0.88
+    },
+    "bat": {
+      "file": "celebrate/bat.m4a",
+      "dur": 1.04
+    },
+    "bed": {
+      "file": "celebrate/bed.m4a",
+      "dur": 0.88
+    },
+    "box": {
+      "file": "celebrate/box.m4a",
+      "dur": 0.96
+    },
+    "bug": {
+      "file": "celebrate/bug.m4a",
+      "dur": 1.04
+    },
+    "bus": {
+      "file": "celebrate/bus.m4a",
+      "dur": 0.96
+    },
+    "cap": {
+      "file": "celebrate/cap.m4a",
+      "dur": 1.04
+    },
+    "cat": {
+      "file": "celebrate/cat.m4a",
+      "dur": 1.04
+    },
+    "cup": {
+      "file": "celebrate/cup.m4a",
+      "dur": 1.04
+    },
+    "dog": {
+      "file": "celebrate/dog.m4a",
+      "dur": 1.04
+    },
+    "fox": {
+      "file": "celebrate/fox.m4a",
+      "dur": 1.04
+    },
+    "hat": {
+      "file": "celebrate/hat.m4a",
+      "dur": 1.04
+    },
+    "hen": {
+      "file": "celebrate/hen.m4a",
+      "dur": 1.04
+    },
+    "jet": {
+      "file": "celebrate/jet.m4a",
+      "dur": 0.96
+    },
+    "log": {
+      "file": "celebrate/log.m4a",
+      "dur": 0.96
+    },
+    "man": {
+      "file": "celebrate/man.m4a",
+      "dur": 1.12
+    },
+    "map": {
+      "file": "celebrate/map.m4a",
+      "dur": 1.04
+    },
+    "net": {
+      "file": "celebrate/net.m4a",
+      "dur": 1.12
+    },
+    "pan": {
+      "file": "celebrate/pan.m4a",
+      "dur": 1.04
+    },
+    "pen": {
+      "file": "celebrate/pen.m4a",
+      "dur": 0.96
+    },
+    "pig": {
+      "file": "celebrate/pig.m4a",
+      "dur": 0.88
+    },
+    "pin": {
+      "file": "celebrate/pin.m4a",
+      "dur": 1.36
+    },
+    "pup": {
+      "file": "celebrate/pup.m4a",
+      "dur": 1.12
+    },
+    "rat": {
+      "file": "celebrate/rat.m4a",
+      "dur": 1.04
+    },
+    "run": {
+      "file": "celebrate/run.m4a",
+      "dur": 1.12
+    },
+    "sun": {
+      "file": "celebrate/sun.m4a",
+      "dur": 1.12
+    },
+    "ten": {
+      "file": "celebrate/ten.m4a",
+      "dur": 1.04
+    },
+    "van": {
+      "file": "celebrate/van.m4a",
+      "dur": 1.04
+    },
+    "web": {
+      "file": "celebrate/web.m4a",
+      "dur": 1.12
+    }
+  },
+  "prompts": {
+    "bag": {
+      "file": "prompts/bag.m4a",
+      "dur": 0.96
+    },
+    "bat": {
+      "file": "prompts/bat.m4a",
+      "dur": 0.96
+    },
+    "bed": {
+      "file": "prompts/bed.m4a",
+      "dur": 0.88
+    },
+    "box": {
+      "file": "prompts/box.m4a",
+      "dur": 0.96
+    },
+    "bug": {
+      "file": "prompts/bug.m4a",
+      "dur": 1.04
+    },
+    "bus": {
+      "file": "prompts/bus.m4a",
+      "dur": 0.96
+    },
+    "cap": {
+      "file": "prompts/cap.m4a",
+      "dur": 0.88
+    },
+    "cat": {
+      "file": "prompts/cat.m4a",
+      "dur": 1.12
+    },
+    "cup": {
+      "file": "prompts/cup.m4a",
+      "dur": 0.88
+    },
+    "dog": {
+      "file": "prompts/dog.m4a",
+      "dur": 1.2
+    },
+    "fox": {
+      "file": "prompts/fox.m4a",
+      "dur": 1.04
+    },
+    "hat": {
+      "file": "prompts/hat.m4a",
+      "dur": 0.96
+    },
+    "hen": {
+      "file": "prompts/hen.m4a",
+      "dur": 0.96
+    },
+    "jet": {
+      "file": "prompts/jet.m4a",
+      "dur": 0.8
+    },
+    "log": {
+      "file": "prompts/log.m4a",
+      "dur": 0.88
+    },
+    "man": {
+      "file": "prompts/man.m4a",
+      "dur": 1.12
+    },
+    "map": {
+      "file": "prompts/map.m4a",
+      "dur": 0.96
+    },
+    "net": {
+      "file": "prompts/net.m4a",
+      "dur": 0.96
+    },
+    "pan": {
+      "file": "prompts/pan.m4a",
+      "dur": 0.88
+    },
+    "pen": {
+      "file": "prompts/pen.m4a",
+      "dur": 1.04
+    },
+    "pig": {
+      "file": "prompts/pig.m4a",
+      "dur": 1.36
+    },
+    "pin": {
+      "file": "prompts/pin.m4a",
+      "dur": 1.04
+    },
+    "pup": {
+      "file": "prompts/pup.m4a",
+      "dur": 1.04
+    },
+    "rat": {
+      "file": "prompts/rat.m4a",
+      "dur": 1.04
+    },
+    "run": {
+      "file": "prompts/run.m4a",
+      "dur": 0.88
+    },
+    "sun": {
+      "file": "prompts/sun.m4a",
+      "dur": 0.88
+    },
+    "ten": {
+      "file": "prompts/ten.m4a",
+      "dur": 0.96
+    },
+    "van": {
+      "file": "prompts/van.m4a",
+      "dur": 1.6
+    },
+    "web": {
+      "file": "prompts/web.m4a",
+      "dur": 0.8
+    }
+  },
+  "bonus": {
+    "bet": {
+      "file": "bonus/bet.m4a",
+      "dur": 2.4
+    },
+    "big": {
+      "file": "bonus/big.m4a",
+      "dur": 1.84
+    },
+    "bin": {
+      "file": "bonus/bin.m4a",
+      "dur": 1.68
+    },
+    "bog": {
+      "file": "bonus/bog.m4a",
+      "dur": 2.32
+    },
+    "bun": {
+      "file": "bonus/bun.m4a",
+      "dur": 2.4
+    },
+    "can": {
+      "file": "bonus/can.m4a",
+      "dur": 1.84
+    },
+    "cog": {
+      "file": "bonus/cog.m4a",
+      "dur": 2.48
+    },
+    "den": {
+      "file": "bonus/den.m4a",
+      "dur": 2.96
+    },
+    "dig": {
+      "file": "bonus/dig.m4a",
+      "dur": 2.08
+    },
+    "dug": {
+      "file": "bonus/dug.m4a",
+      "dur": 2.32
+    },
+    "fan": {
+      "file": "bonus/fan.m4a",
+      "dur": 2.08
+    },
+    "fed": {
+      "file": "bonus/fed.m4a",
+      "dur": 2.24
+    },
+    "fig": {
+      "file": "bonus/fig.m4a",
+      "dur": 2.32
+    },
+    "fin": {
+      "file": "bonus/fin.m4a",
+      "dur": 2.32
+    },
+    "fog": {
+      "file": "bonus/fog.m4a",
+      "dur": 2.56
+    },
+    "fun": {
+      "file": "bonus/fun.m4a",
+      "dur": 2.32
+    },
+    "hog": {
+      "file": "bonus/hog.m4a",
+      "dur": 2.56
+    },
+    "hug": {
+      "file": "bonus/hug.m4a",
+      "dur": 2.24
+    },
+    "jig": {
+      "file": "bonus/jig.m4a",
+      "dur": 2.0
+    },
+    "jog": {
+      "file": "bonus/jog.m4a",
+      "dur": 2.32
+    },
+    "jug": {
+      "file": "bonus/jug.m4a",
+      "dur": 2.32
+    },
+    "lap": {
+      "file": "bonus/lap.m4a",
+      "dur": 2.4
+    },
+    "led": {
+      "file": "bonus/led.m4a",
+      "dur": 2.24
+    },
+    "let": {
+      "file": "bonus/let.m4a",
+      "dur": 2.08
+    },
+    "lug": {
+      "file": "bonus/lug.m4a",
+      "dur": 2.48
+    },
+    "mat": {
+      "file": "bonus/mat.m4a",
+      "dur": 2.0
+    },
+    "men": {
+      "file": "bonus/men.m4a",
+      "dur": 2.32
+    },
+    "met": {
+      "file": "bonus/met.m4a",
+      "dur": 2.08
+    },
+    "mug": {
+      "file": "bonus/mug.m4a",
+      "dur": 2.48
+    },
+    "nap": {
+      "file": "bonus/nap.m4a",
+      "dur": 2.32
+    },
+    "pat": {
+      "file": "bonus/pat.m4a",
+      "dur": 2.08
+    },
+    "pet": {
+      "file": "bonus/pet.m4a",
+      "dur": 2.24
+    },
+    "rag": {
+      "file": "bonus/rag.m4a",
+      "dur": 2.56
+    },
+    "ran": {
+      "file": "bonus/ran.m4a",
+      "dur": 2.64
+    },
+    "red": {
+      "file": "bonus/red.m4a",
+      "dur": 2.24
+    },
+    "rig": {
+      "file": "bonus/rig.m4a",
+      "dur": 2.32
+    },
+    "rug": {
+      "file": "bonus/rug.m4a",
+      "dur": 2.56
+    },
+    "sap": {
+      "file": "bonus/sap.m4a",
+      "dur": 2.32
+    },
+    "sat": {
+      "file": "bonus/sat.m4a",
+      "dur": 2.08
+    },
+    "set": {
+      "file": "bonus/set.m4a",
+      "dur": 2.16
+    },
+    "tag": {
+      "file": "bonus/tag.m4a",
+      "dur": 2.64
+    },
+    "tan": {
+      "file": "bonus/tan.m4a",
+      "dur": 2.32
+    },
+    "tap": {
+      "file": "bonus/tap.m4a",
+      "dur": 2.08
+    },
+    "tin": {
+      "file": "bonus/tin.m4a",
+      "dur": 2.56
+    },
+    "tug": {
+      "file": "bonus/tug.m4a",
+      "dur": 2.24
+    },
+    "vet": {
+      "file": "bonus/vet.m4a",
+      "dur": 2.48
+    },
+    "wag": {
+      "file": "bonus/wag.m4a",
+      "dur": 2.24
+    },
+    "wed": {
+      "file": "bonus/wed.m4a",
+      "dur": 2.4
+    },
+    "wet": {
+      "file": "bonus/wet.m4a",
+      "dur": 2.48
+    },
+    "wig": {
+      "file": "bonus/wig.m4a",
+      "dur": 2.16
+    },
+    "win": {
+      "file": "bonus/win.m4a",
+      "dur": 2.24
+    }
+  },
+  "misc": {
+    "hooray": {
+      "file": "misc/hooray.m4a",
+      "dur": 0.8
+    },
+    "mixer-intro": {
+      "file": "misc/mixer-intro.m4a",
+      "dur": 2.56
+    },
+    "mystery-intro": {
+      "file": "misc/mystery-intro.m4a",
+      "dur": 1.68
+    },
+    "mystery-outro": {
+      "file": "misc/mystery-outro.m4a",
+      "dur": 1.84
+    },
+    "silly-1": {
+      "file": "misc/silly-1.m4a",
+      "dur": 2.88
+    },
+    "silly-2": {
+      "file": "misc/silly-2.m4a",
+      "dur": 3.91
+    },
+    "silly-3": {
+      "file": "misc/silly-3.m4a",
+      "dur": 3.67
+    }
+  }
+}

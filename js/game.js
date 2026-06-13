@@ -15,6 +15,7 @@ import {
   hideCard,
 } from './tiles.js';
 import * as speech from './speech.js';
+import * as audio from './audio.js';
 import * as sfx from './sfx.js';
 import { burst } from './confetti.js';
 
@@ -55,7 +56,7 @@ export class Game {
     this.lastWord = null;       // avoid immediate repeats (guided/mystery)
     this.freeplayIndex = -1;    // rotate FREEPLAY_SETS
     this.found = new Set();     // free play collection
-    this.lastPrompt = [];       // for the 🔊 replay button
+    this.prompt = null;         // current prompt descriptor (for the 🔊 replay button)
     this.busy = false;          // global input lock during animations
     this.advanceTimer = null;
     this.destroyed = false;
@@ -84,6 +85,7 @@ export class Game {
     this.destroyed = true;
     clearTimeout(this.advanceTimer);
     speech.stop();
+    audio.stop();
     if (this.idleStop) this.idleStop();
     for (const t of this.tiles) disposeTile(t);
     this.tiles = [];
@@ -98,12 +100,13 @@ export class Game {
   // ---- layout helpers ------------------------------------------------
 
   benchY() {
-    // Re-derived from visible-plane math so the bench (and the slots/cards stacked
-    // above it) clear the hill crest with comfortable margin. At -0.22*height the
-    // bench center sits at screen-ndcy ≈ -0.44 (~56% down) and its bottom edge at
-    // ≈ -0.55, safely above the hill crests (ndcy ≈ -0.66 / -0.70).
+    // The illustrated background plate (background-position: center bottom) puts
+    // the wooden podium across the lower portion of the viewport. We sit the slot
+    // drop-targets low so tiles land "on the stage": at -0.30*height the slot
+    // centers are at screen-ndcy ≈ -0.60 (~80% down), over the podium top, while
+    // the picture card (benchY + ~2.7) sits just above, centered on the stage.
     const { height } = visibleSize(0);
-    return -height * 0.22;
+    return -height * 0.30;
   }
 
   /** Scale the whole layout group to fit narrow viewports (portrait). */
@@ -189,20 +192,18 @@ export class Game {
       showGoalCard(this.goalCard, 0, baseY, 0.6);
     });
 
-    // prompt
+    // prompt descriptor (drives both the initial speak and the 🔊 replay)
     if (this.mode === 'mystery') {
-      this.lastPrompt = [
-        fill(PHRASES.mysteryPrompt[0], {
-          onset: ONSETS[target.onset].spoken,
-          rime: RIMES[target.rime].spoken,
-        }),
-      ];
+      this.prompt = {
+        kind: 'mystery',
+        word: target.word,
+        onsetKey: target.onset,
+        rimeKey: target.rime,
+        onsetSpoken: ONSETS[target.onset].spoken,
+        rimeSpoken: RIMES[target.rime].spoken,
+      };
     } else {
-      this.lastPrompt = [
-        fill(rand(PHRASES.guidedPrompt), { word: target.word }),
-        `${ONSETS[target.onset].spoken}.`,
-        `${RIMES[target.rime].spoken}.`,
-      ];
+      this.prompt = { kind: 'guided', word: target.word };
     }
     this.speakPrompt();
   }
@@ -245,7 +246,7 @@ export class Game {
     // lower arc: 3 rimes
     this.rowLayout(rimeTiles, this.benchY() + 2.4, s, 2.0);
 
-    this.lastPrompt = ['Mix the sounds! What can you make?'];
+    this.prompt = { kind: 'mixer' };
     this.speakPrompt();
   }
 
@@ -265,8 +266,20 @@ export class Game {
   // ===================================================================
 
   speakPrompt() {
-    if (!this.lastPrompt.length) return;
-    speech.speakSeq(this.lastPrompt, { rate: 0.8, pitch: 1.05, gap: 280 });
+    const p = this.prompt;
+    if (!p) return;
+    if (p.kind === 'guided') {
+      audio.play('prompts', p.word, { fallbackText: 'Can you make ' + p.word + '?', rate: 0.8, pitch: 1.05 });
+    } else if (p.kind === 'mystery') {
+      audio.playSeq([
+        { cat: 'misc', key: 'mystery-intro', fallbackText: 'Mystery word! Listen.', rate: 0.8, pitch: 1.05 },
+        { cat: 'fragments', key: p.onsetKey, fallbackText: p.onsetSpoken, rate: 0.8, pitch: 1.05 },
+        { cat: 'fragments', key: p.rimeKey, fallbackText: p.rimeSpoken, rate: 0.8, pitch: 1.05 },
+        { cat: 'misc', key: 'mystery-outro', fallbackText: 'What does it make?', rate: 0.8, pitch: 1.05 },
+      ], { gap: 300 });
+    } else if (p.kind === 'mixer') {
+      audio.play('misc', 'mixer-intro', { fallbackText: 'Mix the sounds! What can you make?', rate: 0.8, pitch: 1.05 });
+    }
   }
 
   // ===================================================================
@@ -303,7 +316,7 @@ export class Game {
     d.busy = true; // pause idle so the bounce isn't overwritten
     sfx.pop();
     await bounceTile(tile);
-    speech.speak(d.spoken, { rate: 0.85, pitch: 1.1 });
+    audio.play('fragments', d.text, { fallbackText: d.spoken });
     sfx.whoosh();
     d.slotted = true;
     slot.tile = tile;
@@ -328,7 +341,7 @@ export class Game {
     d.slotted = false;
     if (speakIt) {
       sfx.unpop();
-      speech.speak(d.spoken, { rate: 0.85, pitch: 1.1 });
+      audio.play('fragments', d.text, { fallbackText: d.spoken });
     }
     await flyTo(tile, d.home.x, d.home.y, d.home.z);
     this.busy = false;
@@ -365,7 +378,7 @@ export class Game {
       tween(left.position, { x: -0.85 }, 220, Ease.inOut),
       tween(right.position, { x: 0.85 }, 220, Ease.inOut),
     ]);
-    await speech.speak(wordObj.word, { rate: 0.7, pitch: 1.05 });
+    await audio.play('words', wordObj.word, { fallbackText: wordObj.word, rate: 0.7, pitch: 1.05 });
 
     sfx.tada();
     const cardY = this.benchY() + 2.6;
@@ -384,7 +397,10 @@ export class Game {
     await popCard(this.card, 0, cardY, 1.0, this.mode === 'mystery' ? 1.05 : 1);
 
     if (ANIMAL_EMOJI.has(wordObj.emoji)) sfx.boing();
-    speech.speak(fill(rand(PHRASES.celebrate), { word: wordObj.word }), { rate: 0.85, pitch: 1.1 });
+    audio.play('celebrate', wordObj.word, {
+      fallbackText: fill(rand(PHRASES.celebrate), { word: wordObj.word }),
+      rate: 0.85, pitch: 1.1,
+    });
 
     if (this.mode === 'freeplay') {
       this.addToGarden(wordObj);
@@ -406,8 +422,11 @@ export class Game {
     sfx.sparkle();
     const y = this.benchY() + 2.4;
     burst({ x: 0, y, z: 1 }, { count: 50, gold: true, spread: 0.7 });
-    await speech.speak(blend, { rate: 0.75, pitch: 1.1 });
-    speech.speak(fill(rand(PHRASES.bonus), { word: blend }), { rate: 0.85, pitch: 1.1 });
+    // the bonus clip already says the word + phrase ("Mat! That's a real word too!")
+    await audio.play('bonus', blend, {
+      fallbackText: fill(rand(PHRASES.bonus), { word: blend }),
+      rate: 0.85, pitch: 1.1,
+    });
     await wait(700);
     await this.returnTiles(left, right);
     this.busy = false;
@@ -417,8 +436,14 @@ export class Game {
   async silly(blend, left, right) {
     sfx.silly();
     await Promise.all([jiggleTile(left), jiggleTile(right)]);
+    // the blend is arbitrary nonsense with no recording — voice it via TTS,
+    // then play a recorded silly phrase on top.
     await speech.speak(blend, { rate: 0.7, pitch: 1.0 });
-    speech.speak(fill(rand(PHRASES.silly), { blend }), { rate: 0.85, pitch: 1.1 });
+    const sillyKey = 'silly-' + (1 + ((Math.random() * 3) | 0));
+    audio.play('misc', sillyKey, {
+      fallbackText: fill(rand(PHRASES.silly), { blend }),
+      rate: 0.85, pitch: 1.1,
+    });
     await wait(400);
     await this.returnTiles(left, right);
     this.busy = false;

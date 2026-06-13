@@ -4,6 +4,7 @@
 import { initScene } from './scene.js';
 import { Game } from './game.js';
 import * as speech from './speech.js';
+import * as audio from './audio.js';
 import * as sfx from './sfx.js';
 
 const canvas = document.getElementById('scene');
@@ -35,6 +36,9 @@ ready().then(() => {
   initScene(canvas);
 });
 
+// Kick off manifest loading at boot (non-blocking — fallbacks cover the gap).
+audio.ready.catch(() => {});
+
 // ---- audio unlock on first gesture -----------------------------------
 
 function unlockAudio() {
@@ -42,6 +46,7 @@ function unlockAudio() {
   audioUnlocked = true;
   sfx.unlock();
   speech.unlock();
+  audio.unlock();
 }
 // any first interaction unlocks
 window.addEventListener('pointerdown', unlockAudio, { once: false });
@@ -54,6 +59,7 @@ function showMenu() {
     game = null;
   }
   speech.stop();
+  audio.stop();
   menu.classList.remove('hidden');
   hudRoot.classList.add('hidden');
 }

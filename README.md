@@ -40,19 +40,31 @@ https://kaigani.github.io/sound-sprouts/
 ## How it works
 
 - Plain ES modules, no framework, no bundler. Served straight from disk.
-- ThreeJS (vendored locally) draws the garden, the tiles, and the picture cards.
-- **All speech uses the device's built-in voices via the Web Speech API** —
-  there are *no recorded voice assets* in this project. Pronunciation is tuned
-  in `js/data.js` using deliberately spelled "spoken" strings (e.g. `buh`, `at`).
-- Sound effects are synthesized at runtime with the Web Audio API — also no
-  audio files.
+- ThreeJS (vendored locally) draws the glossy letter tiles and picture cards over
+  an illustrated garden background with a podium stage.
+- **A consistent warm "preschool teacher" voice** speaks every sound, word, and
+  encouragement — 176 short clips in `assets/audio/`, played from a small
+  `manifest.json`. The only thing not pre-recorded is the playful nonsense blend
+  in Silly mode (arbitrary syllables), which uses the device Web Speech voice;
+  Web Speech is also the automatic fallback if any clip is missing.
+- Sound effects are synthesized at runtime with the Web Audio API — no audio
+  files for those.
 - No analytics, no external links, no network requests at runtime. Everything
   is local and safe by default.
 
+## Phase 2 — generated assets
+
+The artwork (tiles, picture cards, HUD buttons, background) and the voice were
+generated locally for this project: **Qwen Image Edit** for the graphics and
+**Qwen3 TTS** (voice design + cloning, QA'd with Whisper) for the voice. They are
+original works with no third-party content. Pronunciation is still tuned in
+`js/data.js` via deliberately spelled "spoken" strings (e.g. `buh`, `at`).
+
 ## Credits & license
 
-Picture cards use **Twemoji** graphics. See [`ASSETS.md`](./ASSETS.md) for the
-full asset manifest, sources, and the Twemoji **CC-BY 4.0** attribution line,
-along with the Fredoka font license.
+Phase 2 graphics and voice are project-owned original works (see
+[`ASSETS.md`](./ASSETS.md)). The retained **Twemoji** fallback graphics are
+**CC-BY 4.0**; `ASSETS.md` has the full manifest, the Twemoji attribution line,
+and the Fredoka font license.
 
 Built with care for one small learner. 🌱

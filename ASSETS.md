@@ -7,7 +7,25 @@
 | Twemoji 15.1.0 emoji artwork (31 SVGs, see `assets/twemoji/`) | https://github.com/jdecked/twemoji | Twitter/X & Twemoji contributors | CC-BY 4.0 | YES — attribution given in ASSETS.md and README | Unmodified |
 | Fredoka font SemiBold (`assets/fonts/fredoka-latin-600-normal.woff2`) | https://fonts.google.com/specimen/Fredoka via Fontsource (@fontsource/fredoka@5.0.13) | Milena Brandão & Hafontia | SIL OFL 1.1 | No UI attribution required | Subset latin-600 as shipped by Fontsource |
 | Sound effects | N/A — synthesized at runtime via WebAudio API | N/A | N/A | N/A | No sourced audio assets |
-| Speech / voices | N/A — device built-in Web Speech API voices | N/A | N/A | N/A | No sourced audio assets |
+| Web Speech fallback voices | N/A — device built-in Web Speech API voices | N/A | N/A | N/A | Used only if a recorded clip is missing |
+
+## Phase 2 — generated assets (original works, no third-party license)
+
+All Phase 2 assets below were generated locally and are original works for this
+project. They contain no third-party content, recognizable copyrighted
+characters, brand logos, or sampled material, so no external license or
+attribution applies. The runtime makes no network calls to any model or service.
+
+| Asset | Tool / model (run locally) | Creator | License | Attribution required | Notes |
+|---|---|---|---|---|---|
+| Letter tiles (`assets/gen/tiles/*.png`, 31) | Qwen Image Edit 2509 (local) | Generated for this project | Original work — project-owned | No | Blue onset / orange rime glossy tiles, edited from a single seed tile per color |
+| Object picture cards (`assets/gen/objects/*.png`, 30 + `mystery.png`) | Qwen Image Edit 2509 (local) | Generated for this project | Original work — project-owned | No | Consistent toy-style objects, one shared reference style |
+| HUD buttons (`assets/gen/ui/btn-*.png`) | Qwen Image Edit 2509 (local) | Generated for this project | Original work — project-owned | No | Home, speaker, shuffle, play |
+| Background plate (`assets/gen/bg.png`) | Qwen Image Edit 2509 (local) | Generated for this project | Original work — project-owned | No | Garden scene + podium stage |
+| Voice clips (`assets/audio/**`, 176 + `manifest.json`) | Qwen3 TTS voice-design + voice-clone (local) | Generated for this project | Original work — project-owned | No | One consistent warm preschool-teacher voice; QA round-tripped with Whisper |
+
+The earlier Twemoji emoji set is retained as a defensive fallback only and is
+still covered by its CC-BY 4.0 attribution below.
 
 ---
 

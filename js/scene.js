@@ -20,22 +20,21 @@ export const Ease = {
 // ---- Module state ----------------------------------------------------
 
 let renderer, scene, camera;
-let clouds = [];
 const tweens = [];
 const everyFrame = [];
 let raycaster, ndc;
 
-const SKY_TOP = new THREE.Color('#FFF7E8');
-const SKY_BOT = new THREE.Color('#BDE8FF');
-
 /**
- * Boot the renderer/scene/camera and build the garden background.
+ * Boot the renderer/scene/camera. The illustrated background plate is a CSS
+ * background behind a TRANSPARENT WebGL canvas (see index.html / style.css), so
+ * the renderer clears to alpha 0 and we no longer build sky/hills/clouds here.
  * @param {HTMLCanvasElement} canvas
  */
 export function initScene(canvas) {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.setClearAlpha(0);
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   scene = new THREE.Scene();
@@ -44,7 +43,6 @@ export function initScene(canvas) {
   camera.position.set(0, 0, 12);
   camera.lookAt(0, 0, 0);
 
-  buildBackground();
   buildLights();
 
   raycaster = new THREE.Raycaster();
@@ -62,89 +60,6 @@ function buildLights() {
   const dir = new THREE.DirectionalLight(0xffffff, 0.7);
   dir.position.set(3, 6, 6);
   scene.add(dir);
-}
-
-/** Full-screen gradient sky (background plane), hills and drifting clouds. */
-function buildBackground() {
-  // Gradient sky as a large plane far behind everything, lit independently.
-  const skyCanvas = document.createElement('canvas');
-  skyCanvas.width = 4;
-  skyCanvas.height = 256;
-  const sctx = skyCanvas.getContext('2d');
-  const grad = sctx.createLinearGradient(0, 0, 0, 256);
-  grad.addColorStop(0, '#FFF7E8');
-  grad.addColorStop(1, '#BDE8FF');
-  sctx.fillStyle = grad;
-  sctx.fillRect(0, 0, 4, 256);
-  const skyTex = new THREE.CanvasTexture(skyCanvas);
-  skyTex.colorSpace = THREE.SRGBColorSpace;
-
-  const sky = new THREE.Mesh(
-    new THREE.PlaneGeometry(120, 120),
-    new THREE.MeshBasicMaterial({ map: skyTex, depthWrite: false })
-  );
-  sky.position.set(0, 0, -20);
-  sky.renderOrder = -10;
-  scene.add(sky);
-
-  // Rolling hills: two flattened domes across the bottom. They sit BEHIND the
-  // play plane (z=0) and are squashed on the z-axis too, so their near surface
-  // never bulges in front of the bench / cards (the original radius-16/18 spheres
-  // reached z≈+10 and occluded the whole lower play area). Crests are tuned via
-  // visible-plane math to land in the bottom ~15% of the screen, clearly below
-  // the bench, in both portrait and landscape.
-  // front: radius 14, scale (1, 0.30, 0.16) at (x, -9.04, -7) -> crest ndcy≈-0.70,
-  //         near surface z = -7 + 14*0.16 ≈ -4.76 (well behind everything).
-  const hillBack = makeHill('#9ED98B', 15, -9.54, -9, 0.30, 0.16);
-  hillBack.position.x = -3;
-  const hillFront = makeHill('#7FC96E', 14, -9.04, -7, 0.30, 0.16);
-  hillFront.position.x = 3.5;
-  scene.add(hillBack, hillFront);
-
-  // Clouds: soft white blobs (merged spheres) drifting slowly.
-  for (let i = 0; i < 3; i++) {
-    const c = makeCloud();
-    c.position.set(-10 + i * 8 + Math.random() * 3, 3 + Math.random() * 2.5, -10);
-    c.userData.speed = 0.12 + Math.random() * 0.1;
-    clouds.push(c);
-    scene.add(c);
-  }
-}
-
-function makeHill(color, radius, y, z, scaleY = 0.42, scaleZ = 1) {
-  const geo = new THREE.SphereGeometry(radius, 32, 16);
-  const mat = new THREE.MeshStandardMaterial({ color, roughness: 1, metalness: 0 });
-  const m = new THREE.Mesh(geo, mat);
-  m.scale.set(1, scaleY, scaleZ);
-  m.position.set(0, y, z);
-  return m;
-}
-
-function makeCloud() {
-  const group = new THREE.Group();
-  // Soft white clouds. With only ambient + one directional light the un-lit
-  // hemisphere of each blob reads as storm-gray, so we add a strong white
-  // emissive floor to keep them near-white from every angle (SPEC: soft white).
-  const mat = new THREE.MeshStandardMaterial({
-    color: '#ffffff',
-    emissive: new THREE.Color('#fdfdff'),
-    emissiveIntensity: 0.65,
-    roughness: 1,
-    metalness: 0,
-  });
-  const blobs = [
-    [0, 0, 1.0],
-    [-1.0, -0.2, 0.8],
-    [1.0, -0.2, 0.8],
-    [0.4, 0.4, 0.7],
-  ];
-  for (const [x, y, r] of blobs) {
-    const s = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), mat);
-    s.position.set(x, y, 0);
-    group.add(s);
-  }
-  group.scale.setScalar(0.9);
-  return group;
 }
 
 function onResize() {
@@ -261,13 +176,6 @@ function renderLoop(time) {
   elapsedTime += dt;
 
   stepTweens(dt);
-
-  // drift clouds, wrap around
-  const half = visibleSize(-10).width / 2 + 6;
-  for (const c of clouds) {
-    c.position.x += c.userData.speed * dt;
-    if (c.position.x > half) c.position.x = -half;
-  }
 
   for (const fn of everyFrame) fn(dt, elapsedTime);
 

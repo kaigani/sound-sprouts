@@ -23,13 +23,18 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+html {
+  /* sky fallback behind the fixed #bg plate; prevents a white flash and stops
+     body-background propagation from covering the z-index:-1 plate. */
+  background-color: var(--sky);
+}
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--cream);
+  background: transparent;
   font-family: var(--font);
   /* suppress long-press callout / selection / context menus on iPad */
   -webkit-user-select: none;
@@ -39,6 +44,19 @@ html, body {
   touch-action: none;
 }
 
+/* illustrated background plate behind the transparent WebGL canvas. cover +
+   center bottom keeps the podium centered & visible in portrait and landscape. */
+#bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url('../assets/gen/bg.png');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-color: var(--sky);
+}
+
 #scene {
   position: fixed;
   inset: 0;
@@ -46,6 +64,7 @@ html, body {
   height: 100%;
   display: block;
   touch-action: none;
+  background: transparent;
 }
 
 .hidden { display: none !important; }
@@ -156,6 +175,26 @@ html, body {
   box-shadow: 0 3px 0 rgba(74, 47, 31, 0.12), 0 6px 12px rgba(74, 47, 31, 0.18);
 }
 
+/* image-based HUD buttons: the PNG is itself a round glossy cream button, so we
+   drop the CSS pill background/shadow and let the artwork carry the look. */
+.hud-img {
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  box-shadow: none;
+  font-size: 0;
+}
+
+.hud-img:active {
+  box-shadow: none;
+}
+
+.hud-home    { background-image: url('../assets/gen/ui/btn-home.png'); }
+.hud-sound   { background-image: url('../assets/gen/ui/btn-sound.png'); }
+.hud-shuffle { background-image: url('../assets/gen/ui/btn-shuffle.png'); }
+.hud-play    { background-image: url('../assets/gen/ui/btn-play.png'); }
+
 #btn-home {
   top: max(16px, env(safe-area-inset-top));
   left: max(16px, env(safe-area-inset-left));
@@ -171,32 +210,32 @@ html, body {
   right: max(16px, env(safe-area-inset-right));
 }
 
-/* big celebratory "Again" button, centered near the bottom */
+/* big celebratory "Again" (play) button, centered near the bottom. Uses the
+   generated btn-play artwork; kept round + large + with the pop-in animation. */
 .again-button {
   position: fixed;
   left: 50%;
   bottom: max(28px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  min-width: 200px;
-  height: 96px;
-  padding: 0 40px;
+  width: 110px;
+  height: 110px;
+  padding: 0;
   border: none;
-  border-radius: 48px;
-  background: var(--leaf);
-  color: #ffffff;
-  font-family: var(--font);
-  font-weight: 600;
-  font-size: 52px;
+  border-radius: 50%;
+  background-color: transparent;
+  background-image: url('../assets/gen/ui/btn-play.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  font-size: 0;
   cursor: pointer;
   z-index: 25;
-  box-shadow: 0 8px 0 rgba(50, 100, 40, 0.35), 0 14px 26px rgba(74, 47, 31, 0.2);
   animation: again-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   touch-action: manipulation;
 }
 
 .again-button:active {
   transform: translateX(-50%) translateY(4px);
-  box-shadow: 0 4px 0 rgba(50, 100, 40, 0.35), 0 8px 14px rgba(74, 47, 31, 0.2);
 }
 
 @keyframes again-pop {

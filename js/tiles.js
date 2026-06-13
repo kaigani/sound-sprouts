@@ -1,88 +1,63 @@
-// tiles.js — visuals for the build mechanic: rounded sound tiles with letter
-// textures, the wooden bench with two slots, and the pop-in picture card.
-// All meshes live in the single shared scene.
+// tiles.js — visuals for the build mechanic: flat textured sound tiles (using the
+// pre-shaded generated PNGs), the two slot drop-targets, and the pop-in picture
+// card (generated object art). All meshes live in the single shared scene.
 
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from '../vendor/RoundedBoxGeometry.js';
 import { getScene, tween, Ease, onFrame } from './scene.js';
 
 // Palette (matches SPEC / data.js)
 const CORAL = '#FF8A66';
 const LEAF = '#7ECB66';
-const BROWN = '#4A2F1F';
-const WOOD = '#D9A05B';
+const FONT_STACK = "'Fredoka', 'Arial Rounded MT Bold', sans-serif";
 
 const TILE_W = 1.6;
 const TILE_H = 1.6;
-const TILE_D = 0.35;
-const TILE_R = 0.18;
 
-const FONT_STACK = "'Fredoka', 'Arial Rounded MT Bold', sans-serif";
-
-// shared rounded geometry (cheap to reuse)
+// shared plane geometry for tiles (cheap to reuse)
 let tileGeo = null;
 function getTileGeo() {
-  if (!tileGeo) tileGeo = new RoundedBoxGeometry(TILE_W, TILE_H, TILE_D, 4, TILE_R);
+  if (!tileGeo) tileGeo = new THREE.PlaneGeometry(TILE_W, TILE_H);
   return tileGeo;
 }
 
-// ---- Letter texture --------------------------------------------------
+const texLoader = new THREE.TextureLoader();
 
-const letterTexCache = new Map();
+// ---- Tile texture (pre-shaded PNG) -----------------------------------
+
+const tileTexCache = new Map();
 
 /**
- * Render lowercase letters onto a canvas texture for the +Z face of a tile.
- * @param {string} text e.g. "c" or "at"
+ * Load assets/gen/tiles/<key>.png as an sRGB, transparent texture. Cached by key.
+ * @param {string} key the fragment key (e.g. "c", "at")
+ * @returns {THREE.Texture}
  */
-function letterTexture(text) {
-  if (letterTexCache.has(text)) return letterTexCache.get(text);
-  const size = 256;
-  const cv = document.createElement('canvas');
-  cv.width = cv.height = size;
-  const g = cv.getContext('2d');
-
-  // soft lighter plate so the letter reads on the colored tile
-  g.fillStyle = 'rgba(255,255,255,0.0)';
-  g.fillRect(0, 0, size, size);
-
-  g.fillStyle = BROWN;
-  g.textAlign = 'center';
-  g.textBaseline = 'middle';
-  const fontSize = text.length > 1 ? 150 : 190;
-  g.font = `600 ${fontSize}px ${FONT_STACK}`;
-  g.fillText(text, size / 2, size / 2 + 8);
-
-  const tex = new THREE.CanvasTexture(cv);
+function tileTexture(key) {
+  if (tileTexCache.has(key)) return tileTexCache.get(key);
+  const tex = texLoader.load(`./assets/gen/tiles/${key}.png`);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 4;
-  letterTexCache.set(text, tex);
+  tileTexCache.set(key, tex);
   return tex;
 }
 
 // ---- Tile ------------------------------------------------------------
 
 /**
- * Make a sound tile.
+ * Make a sound tile — a flat plane textured with the pre-shaded PNG. The art is
+ * already shaded/glossy, so we use MeshBasicMaterial (no scene light needed).
  * @param {'onset'|'rime'} type
- * @param {string} text the spelled fragment (e.g. "c", "at")
+ * @param {string} text the spelled fragment (e.g. "c", "at") — also the PNG key
  * @param {string} spoken the spoken string from data.js
  */
 export function makeTile(type, text, spoken) {
-  const color = type === 'onset' ? CORAL : LEAF;
   const group = new THREE.Group();
 
-  const sideMat = new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0 });
-  const box = new THREE.Mesh(getTileGeo(), sideMat);
-  group.add(box);
-
-  // letter plate on the front face (+Z)
-  const tex = letterTexture(text);
-  const plate = new THREE.Mesh(
-    new THREE.PlaneGeometry(TILE_W * 0.92, TILE_H * 0.92),
-    new THREE.MeshBasicMaterial({ map: tex, transparent: true })
+  const tex = tileTexture(text);
+  const plane = new THREE.Mesh(
+    getTileGeo(),
+    new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false })
   );
-  plate.position.z = TILE_D / 2 + 0.001;
-  group.add(plate);
+  group.add(plane);
 
   group.userData = {
     pickRoot: true,
@@ -157,11 +132,11 @@ export async function flyTo(tile, x, y, z = 0.2) {
 export function disposeTile(tile) {
   getScene().remove(tile);
   tile.traverse((o) => {
-    // tile box geometry is shared (getTileGeo); plate geometry is per-tile.
+    // tile plane geometry is shared (getTileGeo) — never dispose it.
     if (o.geometry && o.geometry !== tileGeo) o.geometry.dispose();
-    // materials are cheap; letter textures are cached & shared across tiles,
-    // so we deliberately do NOT dispose o.material.map here.
-    if (o.material && !o.material.map) o.material.dispose();
+    // tile textures are cached & shared across tiles, so we deliberately do NOT
+    // dispose o.material.map here; only dispose the (cheap) material.
+    if (o.material) o.material.dispose();
   });
 }
 
@@ -174,25 +149,25 @@ export function disposeTile(tile) {
 export function makeBench(y = -2.6) {
   const group = new THREE.Group();
 
-  const plankGeo = new RoundedBoxGeometry(5.2, 1.0, 0.5, 4, 0.22);
-  const plank = new THREE.Mesh(
-    plankGeo,
-    new THREE.MeshStandardMaterial({ color: WOOD, roughness: 0.9, metalness: 0 })
-  );
-  group.add(plank);
-
+  // The wooden podium is painted into the background plate, so there is no bench
+  // mesh anymore — just two subtle translucent rounded drop-target panels that
+  // sit on the podium top and read as "put a sound here".
+  const slotTex = slotPanelTexture();
   const slots = [];
   const slotX = [-1.25, 1.25];
+  const slotSize = 1.75;
   for (let i = 0; i < 2; i++) {
-    // a darker inset rim to read as a "slot"
-    const rim = new THREE.Mesh(
-      new RoundedBoxGeometry(1.75, 1.75, 0.12, 4, 0.2),
-      new THREE.MeshStandardMaterial({ color: '#C28A45', roughness: 1 })
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(slotSize, slotSize),
+      new THREE.MeshBasicMaterial({ map: slotTex, transparent: true, opacity: 0.5, depthWrite: false })
     );
-    rim.position.set(slotX[i], 0.55, 0.05);
-    group.add(rim);
+    panel.position.set(slotX[i], 0, 0.02);
+    panel.renderOrder = 1;
+    group.add(panel);
 
-    const world = new THREE.Vector3(slotX[i], y + 0.55, 0.35);
+    // World drop position for slot/flyTo logic. z slightly forward so a slotted
+    // tile sits just in front of the translucent panel.
+    const world = new THREE.Vector3(slotX[i], y, 0.2);
     slots.push({ index: i, world, tile: null });
   }
 
@@ -201,20 +176,45 @@ export function makeBench(y = -2.6) {
   return { group, slots };
 }
 
+// A soft rounded translucent panel texture, cached, for the slot drop-targets.
+let slotPanelTex = null;
+function slotPanelTexture() {
+  if (slotPanelTex) return slotPanelTex;
+  const S = 256;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = S;
+  const g = cv.getContext('2d');
+  const pad = 14;
+  roundRect(g, pad, pad, S - pad * 2, S - pad * 2, 44);
+  g.fillStyle = 'rgba(255,255,255,0.30)';
+  g.fill();
+  g.lineWidth = 8;
+  g.strokeStyle = 'rgba(255,255,255,0.65)';
+  g.stroke();
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  slotPanelTex = tex;
+  return tex;
+}
+
 // ---- Picture / goal card --------------------------------------------
 
-const emojiTexCache = new Map();
+// Cache of decoded object images (the generated picture art), keyed by the asset
+// name (word, or "mystery"). Each entry is a 512² canvas holding the picture
+// (either the loaded PNG drawn onto white, or the glyph fallback).
+const objImgCache = new Map();
 
 /**
- * Load a Twemoji SVG into a CanvasTexture. Falls back to drawing the `char`
- * glyph if the SVG can't be fetched/decoded.
- * @param {string} codepoint e.g. "1f408"
+ * Load assets/gen/objects/<name>.png and draw it (contained) onto a 512² canvas.
+ * Falls back to drawing the `char` glyph if the PNG can't be fetched/decoded.
+ * Returns a wrapper with an `.image` canvas the card composer draws from.
+ * @param {string} name asset key — the word, or "mystery"
  * @param {string} char native glyph fallback
- * @returns {Promise<THREE.CanvasTexture>}
+ * @returns {Promise<{image: HTMLCanvasElement}>}
  */
-export function emojiTexture(codepoint, char) {
-  const key = codepoint || char;
-  if (emojiTexCache.has(key)) return Promise.resolve(emojiTexCache.get(key));
+function objectImage(name, char) {
+  const key = name || char;
+  if (objImgCache.has(key)) return Promise.resolve(objImgCache.get(key));
 
   return new Promise((resolve) => {
     const size = 512;
@@ -228,37 +228,34 @@ export function emojiTexture(codepoint, char) {
       g.textBaseline = 'middle';
       g.font = `360px ${FONT_STACK}`;
       g.fillText(char || '⭐', size / 2, size / 2 + 20);
-      const tex = new THREE.CanvasTexture(cv);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      emojiTexCache.set(key, tex);
-      resolve(tex);
+      const wrap = { image: cv };
+      objImgCache.set(key, wrap);
+      resolve(wrap);
     };
 
-    if (!codepoint) { finishGlyph(); return; }
+    if (!name) { finishGlyph(); return; }
 
     const img = new Image();
     img.onload = () => {
       g.clearRect(0, 0, size, size);
-      // contain the SVG with padding
-      const pad = 40;
-      g.drawImage(img, pad, pad, size - pad * 2, size - pad * 2);
-      const tex = new THREE.CanvasTexture(cv);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      emojiTexCache.set(key, tex);
-      resolve(tex);
+      // The object PNGs are RGB on white; draw full-bleed (no padding needed).
+      g.drawImage(img, 0, 0, size, size);
+      const wrap = { image: cv };
+      objImgCache.set(key, wrap);
+      resolve(wrap);
     };
     img.onerror = finishGlyph;
-    img.src = `./assets/twemoji/${codepoint}.svg`;
+    img.src = `./assets/gen/objects/${name}.png`;
   });
 }
 
 /**
- * Compose a picture-card texture: white rounded card with the emoji image up
+ * Compose a picture-card texture: white rounded card with the object image up
  * top and (optionally) the uppercase word below, per-letter coral/green.
- * @param {THREE.Texture} emojiTex
+ * @param {{image: HTMLCanvasElement}} objImg
  * @param {object} [opts] { word, onsetLen, mystery }
  */
-function cardTexture(emojiTex, opts = {}) {
+function cardTexture(objImg, opts = {}) {
   const W = 512;
   const H = 640;
   const cv = document.createElement('canvas');
@@ -275,8 +272,8 @@ function cardTexture(emojiTex, opts = {}) {
   const imgSize = 360;
   const imgX = (W - imgSize) / 2;
   const imgY = 40;
-  if (emojiTex && emojiTex.image) {
-    g.drawImage(emojiTex.image, imgX, imgY, imgSize, imgSize);
+  if (objImg && objImg.image) {
+    g.drawImage(objImg.image, imgX, imgY, imgSize, imgSize);
   }
 
   // the written word (the teaching moment)
@@ -339,13 +336,13 @@ export function makeCard() {
  * @param {object} cfg { codepoint, char, word, onsetLen, mystery }
  */
 export async function setCardContent(card, cfg) {
-  let emojiTex;
+  let objImg;
   if (cfg.mystery) {
-    emojiTex = await emojiTexture('2753', '❓');
+    objImg = await objectImage('mystery', '❓');
   } else {
-    emojiTex = await emojiTexture(cfg.codepoint, cfg.char);
+    objImg = await objectImage(cfg.word, cfg.char);
   }
-  const tex = cardTexture(emojiTex, {
+  const tex = cardTexture(objImg, {
     word: cfg.mystery ? '' : cfg.word,
     onsetLen: cfg.onsetLen,
   });
