@@ -48,9 +48,16 @@ export const ready = (async () => {
   }
 })();
 
+/** Cache-bust suffix from the manifest version, so clip URLs change on each
+ *  audio release (the manifest itself is fetched no-cache). */
+function verSuffix() {
+  return manifest && manifest._v ? '?v=' + manifest._v : '';
+}
+
 /** Look up a clip descriptor, or null if absent. */
 function lookup(category, key) {
   if (!manifestOk || !manifest) return null;
+  if (category[0] === '_') return null; // skip the _v version field
   const cat = manifest[category];
   if (!cat) return null;
   const entry = cat[key];
@@ -65,7 +72,7 @@ function getEl(category, key) {
   if (el) return el;
   const entry = lookup(category, key);
   if (!entry) return null;
-  el = new Audio(AUDIO_BASE + entry.file);
+  el = new Audio(AUDIO_BASE + entry.file + verSuffix());
   el.preload = 'auto';
   elCache.set(ck, el);
   return el;

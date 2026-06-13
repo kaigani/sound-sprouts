@@ -88,6 +88,8 @@
 import { ONSETS, RIMES, WORDS } from './js/data.js';
 
 const AUDIO_BASE = './assets/audio/';
+// cache-bust per page load so a reload always auditions the latest clips
+const BUST = '?t=' + Date.now();
 const TILE = (k) => `./assets/gen/tiles/${k}.png`;
 const OBJ  = (w) => `./assets/gen/objects/${w}.png`;
 
@@ -107,7 +109,7 @@ const flagged = new Set(JSON.parse(localStorage.getItem('sprouts-flagged') || '[
 
 let manifest = {};
 try {
-  manifest = await (await fetch(AUDIO_BASE + 'manifest.json')).json();
+  manifest = await (await fetch(AUDIO_BASE + 'manifest.json' + BUST, { cache: 'no-cache' })).json();
 } catch (e) {
   document.getElementById('loading').textContent = 'Could not load manifest.json — serve this over http (python3 -m http.server).';
   throw e;
@@ -158,7 +160,7 @@ let cur = null, curCard = null;
 function play(item, card) {
   if (cur) { cur.pause(); cur.currentTime = 0; }
   if (curCard) curCard.classList.remove('playing');
-  cur = new Audio(AUDIO_BASE + item.file);
+  cur = new Audio(AUDIO_BASE + item.file + BUST);
   curCard = card;
   card.classList.add('playing');
   cur.addEventListener('ended', () => card.classList.remove('playing'));

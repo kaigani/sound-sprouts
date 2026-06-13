@@ -88,8 +88,10 @@ const IPA = {
   og:'ɑɡ',op:'ɑp',ot:'ɑt',ox:'ɑks',ob:'ɑb',od:'ɑd',om:'ɑm',
   un:'ʌn',up:'ʌp',ug:'ʌɡ',ub:'ʌb',ud:'ʌd',um:'ʌm',ut:'ʌt',us:'ʌs',
 };
-const OURS = (r)=>`./assets/audio/fragments/${r}.m4a`;
-const REF  = (r)=>`./assets/audio/ref_kokoro/${r}.m4a`;
+// cache-bust per page load so a reload always auditions the latest clips
+const BUST = '?t=' + Date.now();
+const OURS = (r)=>`./assets/audio/fragments/${r}.m4a${BUST}`;
+const REF  = (r)=>`./assets/audio/ref_kokoro/${r}.m4a${BUST}`;
 let analysis = {};
 try { analysis = await (await fetch('./assets/audio/ref_kokoro/analysis.json')).json(); } catch {}
 
