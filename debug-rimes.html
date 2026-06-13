@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sound Sprouts — Rime A/B vs Kokoro</title>
+<title>Sound Sprouts — Rime Voice Comparison</title>
 <style>
   :root { --bg:#fff7e8; --card:#fff; --brown:#4a2f1f; --coral:#ff8a66; --leaf:#7ecb66;
-          --blue:#66b8ff; --flag:#e8453c; --line:rgba(74,47,31,.14); --amber:#f0a500; }
+          --gold:#f0a500; --pick:#3aa655; --line:rgba(74,47,31,.14); }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { margin:0; background:var(--bg); color:var(--brown);
     font-family:'Fredoka','Arial Rounded MT Bold',system-ui,sans-serif; }
   header { position:sticky; top:0; z-index:10; background:rgba(255,247,232,.97);
     backdrop-filter:blur(6px); border-bottom:2px solid var(--line); padding:12px 16px; }
   h1 { margin:0 0 6px; font-size:21px; }
-  p.sub { margin:0 0 10px; font-size:13px; font-weight:400; opacity:.78; line-height:1.4; }
+  p.sub { margin:0 0 10px; font-size:13px; font-weight:400; opacity:.78; line-height:1.45; }
   .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
   button { font:inherit; cursor:pointer; }
   .tbtn { font-size:14px; font-weight:600; padding:8px 13px; border:2px solid var(--line);
@@ -21,84 +21,66 @@
   .tbtn:active { transform:translateY(1px); }
   .count { font-size:14px; font-weight:600; padding:6px 10px; border-radius:10px;
     background:#fff; border:2px solid var(--line); }
-  .count.has { background:var(--flag); color:#fff; border-color:var(--flag); }
+  .count.has { background:var(--pick); color:#fff; border-color:var(--pick); }
   main { padding:14px 16px 70px; max-width:980px; margin:0 auto; }
-  .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); }
-  .card { position:relative; background:var(--card); border:2px solid var(--line);
-    border-radius:16px; padding:12px; box-shadow:0 3px 0 rgba(74,47,31,.06); }
-  .card.flagged { border-color:var(--flag); background:#fff3f1; }
-  .top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); }
+  .card { background:var(--card); border:2px solid var(--line); border-radius:16px;
+    padding:12px; box-shadow:0 3px 0 rgba(74,47,31,.06); }
+  .card.use-new { border-color:var(--pick); background:#f0faf0; }
+  .top { display:flex; align-items:baseline; gap:10px; margin-bottom:10px; }
   .rime { font-size:30px; font-weight:600; line-height:1; }
   .ipa { font-size:15px; opacity:.7; font-weight:400; }
-  .badge { font-size:11px; font-weight:600; padding:3px 8px; border-radius:20px; }
-  .badge.check { background:#fff2d6; color:#a76f00; border:1px solid #f0c97a; }
-  .badge.review { background:#e9f1ff; color:#2f6bd6; border:1px solid #b9d2f7; }
-  .badge.ok { background:#eef7e9; color:#4e8b33; border:1px solid #c3e3ad; }
-  .flag { margin-left:auto; width:34px; height:34px; border-radius:50%; flex:none;
-    border:2px solid var(--line); background:#fff; font-size:15px; }
-  .card.flagged .flag { background:var(--flag); border-color:var(--flag); color:#fff; }
-  .ab { display:flex; gap:10px; }
+  .ab { display:flex; gap:10px; margin-bottom:10px; }
   .play { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
-    padding:14px 8px; border:2px solid var(--line); border-radius:13px; background:#fff;
-    font-weight:600; font-size:16px; }
-  .play .lbl { font-size:12px; font-weight:400; opacity:.7; }
-  .play.ours { border-color:var(--coral); }
-  .play.ours.playing { background:var(--coral); color:#fff; }
-  .play.ref { border-color:var(--leaf); }
-  .play.ref.playing { background:var(--leaf); color:#fff; }
+    padding:13px 8px; border:2px solid var(--line); border-radius:13px; background:#fff;
+    font-weight:600; font-size:15px; }
+  .play .lbl { font-size:11px; font-weight:400; opacity:.65; }
+  .play.cur { border-color:var(--coral); }
+  .play.cur.playing { background:var(--coral); color:#fff; }
+  .play.new { border-color:var(--leaf); }
+  .play.new.playing { background:var(--leaf); color:#fff; }
   .play:active { transform:translateY(2px); }
-  .nums { display:flex; justify-content:space-between; gap:8px; margin-top:9px;
-    font-size:11px; font-weight:400; opacity:.62; font-variant-numeric:tabular-nums; }
+  .choose { display:flex; align-items:center; gap:8px; }
+  .swap { flex:1; padding:10px; border-radius:12px; border:2px solid var(--line);
+    background:#fff; font-weight:600; font-size:14px; }
+  .card.use-new .swap { background:var(--pick); color:#fff; border-color:var(--pick); }
   dialog { border:none; border-radius:16px; padding:0; max-width:min(92vw,560px); width:100%; }
   dialog::backdrop { background:rgba(0,0,0,.4); }
   .dlg { padding:16px; } .dlg h2 { margin:0 0 8px; font-size:18px; }
-  textarea { width:100%; height:220px; font-family:ui-monospace,Menlo,monospace; font-size:13px;
+  textarea { width:100%; height:200px; font-family:ui-monospace,Menlo,monospace; font-size:13px;
     border:2px solid var(--line); border-radius:12px; padding:10px; }
   .row { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
-  .note { font-size:12px; font-weight:400; opacity:.6; margin-top:14px; line-height:1.5; }
 </style>
 </head>
 <body>
 <header>
-  <h1>🎚️ Rime check — ours vs Kokoro reference</h1>
-  <p class="sub">For each ending chunk, tap <b style="color:var(--coral)">Ours</b> (the shipped clip) and <b style="color:var(--leaf)">Kokoro</b> (a phoneme-exact reference of the correct sound) to compare. The <span class="badge check">check</span> badges are a rough acoustic hint of which to look at first — trust your ear. Flag wrong ones with ⚑ and “Copy flagged”.</p>
+  <h1>🎙️ Rime voice — current vs teacher voice</h1>
+  <p class="sub">The 18 rimes we fixed are in the clean <b style="color:var(--coral)">Kokoro</b> voice. The <b style="color:var(--leaf)">teacher</b> versions re-voice the same correct sound into your warm teacher voice (voice-converted from the matching celebration clips). Tap each to compare. If the teacher version sounds good, tap <b>“Use teacher voice”</b>. Then “Copy choices” and send me the list — I’ll swap those in.</p>
   <div class="toolbar">
-    <span class="count" id="count">0 flagged</span>
-    <button class="tbtn" id="sort">Sort: suspicious first</button>
-    <button class="tbtn" id="copy">Copy flagged</button>
-    <button class="tbtn" id="clear">Clear flags</button>
+    <span class="count" id="count">0 chosen</span>
+    <button class="tbtn" id="copy">Copy choices</button>
+    <button class="tbtn" id="all">Choose all teacher</button>
+    <button class="tbtn" id="clear">Reset</button>
   </div>
 </header>
-<main><div class="grid" id="grid"></div>
-  <p class="note" id="note"></p>
-</main>
+<main><div class="grid" id="grid"></div></main>
 
 <dialog id="dlg"><div class="dlg">
-  <h2>Rimes to revise</h2>
+  <h2>Rimes to swap to teacher voice</h2>
   <textarea id="dlgtext" readonly></textarea>
   <div class="row"><button class="tbtn" id="dlgcopy">Copy</button><button class="tbtn" id="dlgclose">Close</button></div>
 </div></dialog>
 
 <script type="module">
-import { RIMES } from './js/data.js';
-const IPA = {
-  at:'æt',an:'æn',ap:'æp',ag:'æɡ',am:'æm',ad:'æd',ab:'æb',ax:'æks',ak:'æk',
-  ed:'ɛd',eg:'ɛɡ',em:'ɛm',en:'ɛn',et:'ɛt',eb:'ɛb',
-  ig:'ɪɡ',in:'ɪn',ip:'ɪp',it:'ɪt',ix:'ɪks',ib:'ɪb',id:'ɪd',
-  og:'ɑɡ',op:'ɑp',ot:'ɑt',ox:'ɑks',ob:'ɑb',od:'ɑd',om:'ɑm',
-  un:'ʌn',up:'ʌp',ug:'ʌɡ',ub:'ʌb',ud:'ʌd',um:'ʌm',ut:'ʌt',us:'ʌs',
-};
-// cache-bust per page load so a reload always auditions the latest clips
-const BUST = '?t=' + Date.now();
-const OURS = (r)=>`./assets/audio/fragments/${r}.m4a${BUST}`;
-const REF  = (r)=>`./assets/audio/ref_kokoro/${r}.m4a${BUST}`;
-let analysis = {};
-try { analysis = await (await fetch('./assets/audio/ref_kokoro/analysis.json')).json(); } catch {}
+const IPA = { ag:'æɡ', am:'æm', ab:'æb', ax:'æks', ed:'ɛd', em:'ɛm', et:'ɛt', eb:'ɛb',
+  ig:'ɪɡ', in:'ɪn', ib:'ɪb', id:'ɪd', og:'ɑɡ', ot:'ɑt', ob:'ɑb', om:'ɑm', un:'ʌn', up:'ʌp' };
+const RIMES = Object.keys(IPA);
+const BUST = '?t=' + Date.now();                       // always audition the latest
+const CUR = (r)=>`./assets/audio/fragments/${r}.m4a${BUST}`;
+const NEW = (r)=>`./assets/audio/cand_clone/${r}.m4a${BUST}`;
 
-const keys = Object.keys(IPA).filter((r)=>RIMES[r]);
-const flagged = new Set(JSON.parse(localStorage.getItem('sprouts-rime-flags')||'[]'));
-const persist = ()=>localStorage.setItem('sprouts-rime-flags', JSON.stringify([...flagged]));
-let suspiciousFirst = true;
+const chosen = new Set(JSON.parse(localStorage.getItem('sprouts-rime-choices')||'[]'));
+const persist = ()=>localStorage.setItem('sprouts-rime-choices', JSON.stringify([...chosen]));
 
 let cur=null, curEl=null;
 function play(path, el){
@@ -109,76 +91,44 @@ function play(path, el){
   cur.play().catch(()=>{});
 }
 function updateCount(){ const e=document.getElementById('count');
-  e.textContent=`${flagged.size} flagged`; e.classList.toggle('has',flagged.size>0); }
+  e.textContent=`${chosen.size} chosen`; e.classList.toggle('has',chosen.size>0); }
 
 const grid=document.getElementById('grid');
 function render(){
-  const order=[...keys];
-  if(suspiciousFirst){
-    const rank=(r)=>{ const a=analysis[r]||{}; if(a.hint==='review')return 1e6; return a.delta??-1; };
-    order.sort((a,b)=>rank(b)-rank(a));
-  } else order.sort();
   grid.innerHTML='';
-  for(const r of order){
-    const a=analysis[r]||{};
+  for(const r of RIMES){
     const card=document.createElement('div');
-    card.className='card'+(flagged.has(r)?' flagged':'');
-    const badge = a.hint==='review' ? `<span class="badge review">review by ear</span>`
-                : a.hint==='check' ? `<span class="badge check">check first${a.delta!=null?` · Δ${a.delta}`:''}</span>`
-                : a.measured ? `<span class="badge ok">looks ok${a.delta!=null?` · Δ${a.delta}`:''}</span>` : '';
-    const nums = a.measured
-      ? `<span>ours F1 ${a.our_f1} / F2 ${a.our_f2}</span><span>ref F1 ${a.kok_f1} / F2 ${a.kok_f2}</span>`
-      : `<span>ours —</span><span>ref —</span>`;
+    card.className='card'+(chosen.has(r)?' use-new':'');
     card.innerHTML=`
-      <div class="top">
-        <span class="rime">${r}</span>
-        <span class="ipa">/${IPA[r]}/</span>
-        ${badge}
-        <button class="flag" title="Flag for revision">⚑</button>
-      </div>
+      <div class="top"><span class="rime">${r}</span><span class="ipa">/${IPA[r]}/</span></div>
       <div class="ab">
-        <button class="play ours"><span>▶ Ours</span><span class="lbl">${RIMES[r].spoken}</span></button>
-        <button class="play ref"><span>▶ Kokoro</span><span class="lbl">/${IPA[r]}/</span></button>
+        <button class="play cur"><span>▶ Current</span><span class="lbl">Kokoro voice</span></button>
+        <button class="play new"><span>▶ Teacher</span><span class="lbl">voice-converted</span></button>
       </div>
-      <div class="nums">${nums}</div>`;
-    card.querySelector('.play.ours').addEventListener('click',(e)=>play(OURS(r),e.currentTarget));
-    card.querySelector('.play.ref').addEventListener('click',(e)=>play(REF(r),e.currentTarget));
-    card.querySelector('.flag').addEventListener('click',()=>{
-      if(flagged.has(r))flagged.delete(r); else flagged.add(r);
-      card.classList.toggle('flagged'); persist(); updateCount();
+      <div class="choose"><button class="swap">${chosen.has(r)?'✓ Using teacher voice':'Use teacher voice'}</button></div>`;
+    card.querySelector('.play.cur').addEventListener('click',(e)=>play(CUR(r),e.currentTarget));
+    card.querySelector('.play.new').addEventListener('click',(e)=>play(NEW(r),e.currentTarget));
+    card.querySelector('.swap').addEventListener('click',()=>{
+      if(chosen.has(r))chosen.delete(r); else chosen.add(r);
+      persist(); updateCount(); render();
     });
     grid.appendChild(card);
   }
 }
 render(); updateCount();
 
-document.getElementById('note').textContent =
-  'Note: the Δ acoustic hint is approximate. Nasal-ending rimes (-m, -n) naturally nasalize the vowel, which can inflate Δ without the vowel being wrong — so let the A/B listen be the judge. "review by ear" means the vowel could not be measured confidently.';
-
-document.getElementById('sort').addEventListener('click',(e)=>{
-  suspiciousFirst=!suspiciousFirst;
-  e.target.textContent = suspiciousFirst ? 'Sort: suspicious first' : 'Sort: alphabetical';
-  render();
-});
-document.getElementById('clear').addEventListener('click',()=>{
-  if(!flagged.size||!confirm('Clear all flags?'))return;
-  flagged.clear(); persist(); updateCount(); render();
-});
+document.getElementById('all').addEventListener('click',()=>{ RIMES.forEach(r=>chosen.add(r)); persist(); updateCount(); render(); });
+document.getElementById('clear').addEventListener('click',()=>{ if(!chosen.size||!confirm('Reset all choices?'))return; chosen.clear(); persist(); updateCount(); render(); });
 function report(){
-  const list=keys.filter((r)=>flagged.has(r));
-  if(!list.length)return '(nothing flagged)';
-  return list.map((r)=>{const a=analysis[r]||{};
-    return `${r}\t/${IPA[r]}/\tassets/audio/fragments/${r}.m4a\tΔ${a.delta??'-'} ${a.hint||''}`;}).join('\n');
+  const list=RIMES.filter(r=>chosen.has(r));
+  if(!list.length) return '(none chosen — current Kokoro voice kept for all)';
+  return 'Swap these rimes to the teacher voice:\n'+list.map(r=>`${r}\t/${IPA[r]}/\tcand_clone/${r}.m4a`).join('\n');
 }
 const dlg=document.getElementById('dlg');
-document.getElementById('copy').addEventListener('click',()=>{
-  const t=report(); document.getElementById('dlgtext').value=t; dlg.showModal();
-  navigator.clipboard?.writeText(t).catch(()=>{});
-});
-document.getElementById('dlgcopy').addEventListener('click',()=>{
-  const ta=document.getElementById('dlgtext'); ta.select();
-  navigator.clipboard?.writeText(ta.value).catch(()=>document.execCommand('copy'));
-});
+document.getElementById('copy').addEventListener('click',()=>{ const t=report();
+  document.getElementById('dlgtext').value=t; dlg.showModal(); navigator.clipboard?.writeText(t).catch(()=>{}); });
+document.getElementById('dlgcopy').addEventListener('click',()=>{ const ta=document.getElementById('dlgtext');
+  ta.select(); navigator.clipboard?.writeText(ta.value).catch(()=>document.execCommand('copy')); });
 document.getElementById('dlgclose').addEventListener('click',()=>dlg.close());
 </script>
 </body>
