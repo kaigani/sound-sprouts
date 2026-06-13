@@ -2,7 +2,7 @@
   "fragments": {
     "ab": {
       "file": "fragments/ab.m4a",
-      "dur": 1.76
+      "dur": 0.37
     },
     "ad": {
       "file": "fragments/ad.m4a",
@@ -10,7 +10,7 @@
     },
     "ag": {
       "file": "fragments/ag.m4a",
-      "dur": 1.44
+      "dur": 0.41
     },
     "ak": {
       "file": "fragments/ak.m4a",
@@ -18,7 +18,7 @@
     },
     "am": {
       "file": "fragments/am.m4a",
-      "dur": 0.48
+      "dur": 0.4
     },
     "an": {
       "file": "fragments/an.m4a",
@@ -34,7 +34,7 @@
     },
     "ax": {
       "file": "fragments/ax.m4a",
-      "dur": 2.88
+      "dur": 0.42
     },
     "b": {
       "file": "fragments/b.m4a",
@@ -50,11 +50,11 @@
     },
     "eb": {
       "file": "fragments/eb.m4a",
-      "dur": 1.04
+      "dur": 0.36
     },
     "ed": {
       "file": "fragments/ed.m4a",
-      "dur": 0.24
+      "dur": 0.34
     },
     "eg": {
       "file": "fragments/eg.m4a",
@@ -62,7 +62,7 @@
     },
     "em": {
       "file": "fragments/em.m4a",
-      "dur": 0.64
+      "dur": 0.38
     },
     "en": {
       "file": "fragments/en.m4a",
@@ -70,7 +70,7 @@
     },
     "et": {
       "file": "fragments/et.m4a",
-      "dur": 0.24
+      "dur": 0.38
     },
     "f": {
       "file": "fragments/f.m4a",
@@ -86,19 +86,19 @@
     },
     "ib": {
       "file": "fragments/ib.m4a",
-      "dur": 1.12
+      "dur": 0.38
     },
     "id": {
       "file": "fragments/id.m4a",
-      "dur": 0.64
+      "dur": 0.36
     },
     "ig": {
       "file": "fragments/ig.m4a",
-      "dur": 1.2
+      "dur": 0.35
     },
     "in": {
       "file": "fragments/in.m4a",
-      "dur": 5.59
+      "dur": 0.37
     },
     "ip": {
       "file": "fragments/ip.m4a",
@@ -134,7 +134,7 @@
     },
     "ob": {
       "file": "fragments/ob.m4a",
-      "dur": 1.44
+      "dur": 0.39
     },
     "od": {
       "file": "fragments/od.m4a",
@@ -142,11 +142,11 @@
     },
     "og": {
       "file": "fragments/og.m4a",
-      "dur": 1.44
+      "dur": 0.38
     },
     "om": {
       "file": "fragments/om.m4a",
-      "dur": 1.12
+      "dur": 0.39
     },
     "op": {
       "file": "fragments/op.m4a",
@@ -154,7 +154,7 @@
     },
     "ot": {
       "file": "fragments/ot.m4a",
-      "dur": 1.52
+      "dur": 0.38
     },
     "ox": {
       "file": "fragments/ox.m4a",
@@ -194,11 +194,11 @@
     },
     "un": {
       "file": "fragments/un.m4a",
-      "dur": 0.8
+      "dur": 0.39
     },
     "up": {
       "file": "fragments/up.m4a",
-      "dur": 0.8
+      "dur": 0.36
     },
     "us": {
       "file": "fragments/us.m4a",

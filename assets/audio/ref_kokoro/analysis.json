@@ -6,7 +6,7 @@
     "our_f2": 2031,
     "kok_f1": 1029,
     "kok_f2": 1984,
-    "delta": 0.4,
+    "delta": 0.59,
     "measured": true,
     "hint": "ok"
   },
@@ -17,9 +17,9 @@
     "our_f2": 2106,
     "kok_f1": 888,
     "kok_f2": 2295,
-    "delta": 1.06,
+    "delta": 1.09,
     "measured": true,
-    "hint": "ok"
+    "hint": "check"
   },
   "ap": {
     "expected_vowel": "a",
@@ -28,31 +28,31 @@
     "our_f2": 2119,
     "kok_f1": 1028,
     "kok_f2": 2027,
-    "delta": 0.42,
+    "delta": 0.6,
     "measured": true,
     "hint": "ok"
   },
   "ag": {
     "expected_vowel": "a",
     "ipa": null,
-    "our_f1": 755,
-    "our_f2": 2567,
+    "our_f1": 979,
+    "our_f2": 2061,
     "kok_f1": 978,
     "kok_f2": 2072,
-    "delta": 1.81,
+    "delta": 0.49,
     "measured": true,
-    "hint": "check"
+    "hint": "ok"
   },
   "am": {
     "expected_vowel": "a",
     "ipa": null,
-    "our_f1": 952,
-    "our_f2": 1665,
+    "our_f1": 872,
+    "our_f2": 2263,
     "kok_f1": 860,
     "kok_f2": 2296,
-    "delta": 1.97,
+    "delta": 0.37,
     "measured": true,
-    "hint": "check"
+    "hint": "ok"
   },
   "ad": {
     "expected_vowel": "a",
@@ -61,29 +61,29 @@
     "our_f2": 2152,
     "kok_f1": 1001,
     "kok_f2": 1971,
-    "delta": 0.71,
+    "delta": 0.74,
     "measured": true,
     "hint": "ok"
   },
   "ab": {
     "expected_vowel": "a",
     "ipa": null,
-    "our_f1": 806,
-    "our_f2": 2228,
+    "our_f1": 983,
+    "our_f2": 2076,
     "kok_f1": 1004,
     "kok_f2": 2170,
-    "delta": 1.32,
+    "delta": 0.79,
     "measured": true,
     "hint": "ok"
   },
   "ax": {
     "expected_vowel": "a",
     "ipa": null,
-    "our_f1": 978,
-    "our_f2": 1581,
+    "our_f1": 1013,
+    "our_f2": 1933,
     "kok_f1": 998,
     "kok_f2": 1949,
-    "delta": 0.98,
+    "delta": 0.46,
     "measured": true,
     "hint": "ok"
   },
@@ -94,20 +94,20 @@
     "our_f2": 2342,
     "kok_f1": 1032,
     "kok_f2": 1941,
-    "delta": 1.23,
+    "delta": 1.45,
     "measured": true,
-    "hint": "ok"
+    "hint": "check"
   },
   "ed": {
     "expected_vowel": "e",
     "ipa": null,
-    "our_f1": null,
-    "our_f2": null,
+    "our_f1": 889,
+    "our_f2": 2243,
     "kok_f1": 884,
     "kok_f2": 2239,
-    "delta": null,
-    "measured": false,
-    "hint": "review"
+    "delta": 0.3,
+    "measured": true,
+    "hint": "ok"
   },
   "eg": {
     "expected_vowel": "e",
@@ -116,20 +116,20 @@
     "our_f2": 2100,
     "kok_f1": 848,
     "kok_f2": 2233,
-    "delta": 0.59,
+    "delta": 0.71,
     "measured": true,
     "hint": "ok"
   },
   "em": {
     "expected_vowel": "e",
     "ipa": null,
-    "our_f1": 326,
-    "our_f2": 1717,
+    "our_f1": 830,
+    "our_f2": 1873,
     "kok_f1": 852,
     "kok_f2": 1871,
-    "delta": 2.15,
+    "delta": 0.3,
     "measured": true,
-    "hint": "check"
+    "hint": "ok"
   },
   "en": {
     "expected_vowel": "e",
@@ -138,51 +138,51 @@
     "our_f2": 2016,
     "kok_f1": 783,
     "kok_f2": 2124,
-    "delta": 0.68,
+    "delta": 1.18,
     "measured": true,
-    "hint": "ok"
+    "hint": "check"
   },
   "et": {
     "expected_vowel": "e",
     "ipa": null,
-    "our_f1": null,
-    "our_f2": null,
+    "our_f1": 864,
+    "our_f2": 2216,
     "kok_f1": 884,
     "kok_f2": 2219,
-    "delta": null,
-    "measured": false,
-    "hint": "review"
+    "delta": 0.41,
+    "measured": true,
+    "hint": "ok"
   },
   "eb": {
     "expected_vowel": "e",
     "ipa": null,
-    "our_f1": 365,
-    "our_f2": 2219,
+    "our_f1": 935,
+    "our_f2": 2087,
     "kok_f1": 934,
     "kok_f2": 2146,
-    "delta": 2.61,
+    "delta": 0.49,
     "measured": true,
-    "hint": "check"
+    "hint": "ok"
   },
   "ig": {
     "expected_vowel": "i",
     "ipa": null,
-    "our_f1": 469,
-    "our_f2": 2174,
+    "our_f1": 578,
+    "our_f2": 2307,
     "kok_f1": 673,
     "kok_f2": 2291,
-    "delta": 0.65,
+    "delta": 0.3,
     "measured": true,
     "hint": "ok"
   },
   "in": {
     "expected_vowel": "i",
     "ipa": null,
-    "our_f1": 603,
-    "our_f2": 2060,
+    "our_f1": 628,
+    "our_f2": 2045,
     "kok_f1": 688,
     "kok_f2": 2094,
-    "delta": 0.31,
+    "delta": 0.26,
     "measured": true,
     "hint": "ok"
   },
@@ -193,9 +193,9 @@
     "our_f2": 2475,
     "kok_f1": 727,
     "kok_f2": 1969,
-    "delta": 1.45,
+    "delta": 1.59,
     "measured": true,
-    "hint": "ok"
+    "hint": "check"
   },
   "it": {
     "expected_vowel": "i",
@@ -204,9 +204,9 @@
     "our_f2": 2591,
     "kok_f1": 752,
     "kok_f2": 2264,
-    "delta": 0.71,
+    "delta": 0.83,
     "measured": true,
-    "hint": "ok"
+    "hint": "check"
   },
   "ix": {
     "expected_vowel": "i",
@@ -215,40 +215,40 @@
     "our_f2": 2629,
     "kok_f1": 735,
     "kok_f2": 2394,
-    "delta": 0.54,
+    "delta": 0.47,
     "measured": true,
     "hint": "ok"
   },
   "ib": {
     "expected_vowel": "i",
     "ipa": null,
-    "our_f1": 492,
-    "our_f2": 2262,
+    "our_f1": 737,
+    "our_f2": 2208,
     "kok_f1": 730,
     "kok_f2": 2233,
-    "delta": 0.55,
+    "delta": 0.31,
     "measured": true,
     "hint": "ok"
   },
   "id": {
     "expected_vowel": "i",
     "ipa": null,
-    "our_f1": 844,
-    "our_f2": 2576,
+    "our_f1": 645,
+    "our_f2": 2066,
     "kok_f1": 683,
     "kok_f2": 2258,
-    "delta": 1.41,
+    "delta": 0.82,
     "measured": true,
-    "hint": "ok"
+    "hint": "check"
   },
   "og": {
     "expected_vowel": "o",
     "ipa": null,
-    "our_f1": 795,
-    "our_f2": 1355,
+    "our_f1": 987,
+    "our_f2": 1684,
     "kok_f1": 965,
     "kok_f2": 1691,
-    "delta": 1.13,
+    "delta": 0.38,
     "measured": true,
     "hint": "ok"
   },
@@ -259,20 +259,20 @@
     "our_f2": 1267,
     "kok_f1": 1016,
     "kok_f2": 1465,
-    "delta": 0.71,
+    "delta": 0.77,
     "measured": true,
     "hint": "ok"
   },
   "ot": {
     "expected_vowel": "o",
     "ipa": null,
-    "our_f1": 917,
-    "our_f2": 1426,
+    "our_f1": 1075,
+    "our_f2": 1449,
     "kok_f1": 1075,
     "kok_f2": 1487,
-    "delta": 1.52,
+    "delta": 0.76,
     "measured": true,
-    "hint": "check"
+    "hint": "ok"
   },
   "ox": {
     "expected_vowel": "o",
@@ -281,18 +281,18 @@
     "our_f2": 1568,
     "kok_f1": 988,
     "kok_f2": 1535,
-    "delta": 0.91,
+    "delta": 0.79,
     "measured": true,
     "hint": "ok"
   },
   "ob": {
     "expected_vowel": "o",
     "ipa": null,
-    "our_f1": 854,
-    "our_f2": 1342,
+    "our_f1": 997,
+    "our_f2": 1654,
     "kok_f1": 956,
     "kok_f2": 1715,
-    "delta": 0.91,
+    "delta": 0.22,
     "measured": true,
     "hint": "ok"
   },
@@ -303,40 +303,40 @@
     "our_f2": 1533,
     "kok_f1": 1029,
     "kok_f2": 1783,
-    "delta": 0.72,
+    "delta": 0.97,
     "measured": true,
-    "hint": "ok"
+    "hint": "check"
   },
   "om": {
     "expected_vowel": "o",
     "ipa": null,
-    "our_f1": 845,
-    "our_f2": 1341,
+    "our_f1": 616,
+    "our_f2": 1707,
     "kok_f1": 601,
     "kok_f2": 1720,
-    "delta": 2.01,
+    "delta": 0.53,
     "measured": true,
-    "hint": "check"
+    "hint": "ok"
   },
   "un": {
     "expected_vowel": "u",
     "ipa": null,
-    "our_f1": 1031,
-    "our_f2": 1650,
+    "our_f1": 673,
+    "our_f2": 2058,
     "kok_f1": 640,
     "kok_f2": 2066,
-    "delta": 2.64,
+    "delta": 0.52,
     "measured": true,
-    "hint": "check"
+    "hint": "ok"
   },
   "up": {
     "expected_vowel": "u",
     "ipa": null,
-    "our_f1": 1112,
-    "our_f2": 1956,
+    "our_f1": 925,
+    "our_f2": 1616,
     "kok_f1": 941,
     "kok_f2": 1624,
-    "delta": 1.47,
+    "delta": 0.52,
     "measured": true,
     "hint": "ok"
   },
@@ -347,7 +347,7 @@
     "our_f2": 1793,
     "kok_f1": 792,
     "kok_f2": 1889,
-    "delta": 1.53,
+    "delta": 1.6,
     "measured": true,
     "hint": "check"
   },
@@ -358,7 +358,7 @@
     "our_f2": 1563,
     "kok_f1": 931,
     "kok_f2": 1569,
-    "delta": 0.66,
+    "delta": 0.36,
     "measured": true,
     "hint": "ok"
   },
@@ -369,9 +369,9 @@
     "our_f2": 1822,
     "kok_f1": 899,
     "kok_f2": 1903,
-    "delta": 0.89,
+    "delta": 1.01,
     "measured": true,
-    "hint": "ok"
+    "hint": "check"
   },
   "um": {
     "expected_vowel": "u",
@@ -380,7 +380,7 @@
     "our_f2": 1614,
     "kok_f1": 694,
     "kok_f2": 1630,
-    "delta": 1.55,
+    "delta": 1.31,
     "measured": true,
     "hint": "check"
   },
@@ -391,7 +391,7 @@
     "our_f2": 1705,
     "kok_f1": 934,
     "kok_f2": 1733,
-    "delta": 0.36,
+    "delta": 0.23,
     "measured": true,
     "hint": "ok"
   },
@@ -402,7 +402,7 @@
     "our_f2": 1731,
     "kok_f1": 832,
     "kok_f2": 1838,
-    "delta": 0.02,
+    "delta": 0.35,
     "measured": true,
     "hint": "ok"
   }
