@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sound Sprouts — Audio Debug</title>
+<style>
+  :root { --bg:#fff7e8; --card:#fff; --brown:#4a2f1f; --coral:#ff8a66; --leaf:#7ecb66;
+          --blue:#66b8ff; --flag:#e8453c; --line:rgba(74,47,31,.14); }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; background:var(--bg); color:var(--brown);
+    font-family:'Fredoka','Arial Rounded MT Bold',system-ui,sans-serif; }
+  header { position:sticky; top:0; z-index:10; background:rgba(255,247,232,.96);
+    backdrop-filter:blur(6px); border-bottom:2px solid var(--line); padding:12px 16px; }
+  h1 { margin:0 0 8px; font-size:22px; }
+  .sub { font-size:13px; opacity:.7; margin:0 0 10px; font-weight:400; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .toolbar input[type=search] { flex:1 1 200px; min-width:140px; font:inherit; font-size:16px;
+    padding:9px 12px; border:2px solid var(--line); border-radius:12px; background:#fff; }
+  button { font:inherit; cursor:pointer; }
+  .tbtn { font-size:14px; font-weight:600; padding:9px 14px; border:2px solid var(--line);
+    border-radius:12px; background:#fff; color:var(--brown); }
+  .tbtn:active { transform:translateY(1px); }
+  .count { font-size:14px; font-weight:600; padding:6px 10px; border-radius:10px;
+    background:#fff; border:2px solid var(--line); }
+  .count.has { background:var(--flag); color:#fff; border-color:var(--flag); }
+  main { padding:14px 16px 60px; }
+  section { margin-bottom:26px; }
+  .sec-head { display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;
+    font-size:18px; font-weight:600; margin:6px 0 12px; }
+  .sec-head .chev { transition:transform .15s; }
+  section.collapsed .chev { transform:rotate(-90deg); }
+  section.collapsed .grid { display:none; }
+  .grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+  .card { position:relative; display:flex; align-items:center; gap:10px; padding:10px;
+    background:var(--card); border:2px solid var(--line); border-radius:16px;
+    box-shadow:0 3px 0 rgba(74,47,31,.06); transition:transform .06s, box-shadow .1s, border-color .1s; }
+  .card .hit { display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer; }
+  .card:active { transform:translateY(2px); }
+  .card.playing { border-color:var(--leaf); box-shadow:0 0 0 3px rgba(126,203,102,.4); }
+  .card.flagged { border-color:var(--flag); background:#fff3f1; }
+  .thumb { width:46px; height:46px; flex:none; object-fit:contain;
+    background:rgba(0,0,0,.03); border-radius:10px; }
+  .meta { min-width:0; }
+  .key { font-size:20px; font-weight:600; line-height:1.1; }
+  .exp { font-size:12px; opacity:.7; font-weight:400; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; }
+  .dur { font-size:11px; opacity:.5; font-weight:400; }
+  .flag { flex:none; width:34px; height:34px; border-radius:50%; border:2px solid var(--line);
+    background:#fff; font-size:15px; line-height:1; display:flex; align-items:center;
+    justify-content:center; }
+  .card.flagged .flag { background:var(--flag); border-color:var(--flag); color:#fff; }
+  dialog { border:none; border-radius:16px; padding:0; max-width:min(92vw,560px); width:100%; }
+  dialog::backdrop { background:rgba(0,0,0,.4); }
+  .dlg { padding:16px; }
+  .dlg h2 { margin:0 0 8px; font-size:18px; }
+  textarea { width:100%; height:240px; font-family:ui-monospace,Menlo,monospace; font-size:13px;
+    border:2px solid var(--line); border-radius:12px; padding:10px; }
+  .row { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+  .hint { font-size:12px; opacity:.6; font-weight:400; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🔊 Sound Sprouts — Audio Debug</h1>
+  <p class="sub">Tap a card to hear its clip. Tap the ⚑ to flag a wrong one. Use “Copy flagged” to get the list of files to replace. Flags are saved on this device.</p>
+  <div class="toolbar">
+    <input type="search" id="search" placeholder="Filter… (e.g. c, at, cat)" autocomplete="off">
+    <span class="count" id="count">0 flagged</span>
+    <button class="tbtn" id="copy">Copy flagged</button>
+    <button class="tbtn" id="clear">Clear flags</button>
+    <button class="tbtn" id="expand">Expand all</button>
+  </div>
+</header>
+<main id="main"><p id="loading" class="hint">Loading clips…</p></main>
+
+<dialog id="dlg"><div class="dlg">
+  <h2>Flagged clips to replace</h2>
+  <p class="hint">Each line: <code>category/key</code> — file path — expected pronunciation.</p>
+  <textarea id="dlgtext" readonly></textarea>
+  <div class="row">
+    <button class="tbtn" id="dlgcopy">Copy to clipboard</button>
+    <button class="tbtn" id="dlgclose">Close</button>
+  </div>
+</div></dialog>
+
+<script type="module">
+import { ONSETS, RIMES, WORDS } from './js/data.js';
+
+const AUDIO_BASE = './assets/audio/';
+const TILE = (k) => `./assets/gen/tiles/${k}.png`;
+const OBJ  = (w) => `./assets/gen/objects/${w}.png`;
+
+const MISC_TEXT = {
+  'silly-1': 'What a silly sound! Try another one!',
+  'silly-2': 'Hee hee! That is so silly! Try again!',
+  'silly-3': 'Ooh, what a funny sound! Try a different tile!',
+  'mixer-intro': 'Mix the sounds! What can you make?',
+  'mystery-intro': 'Mystery word! Listen.',
+  'mystery-outro': 'What does it make?',
+  'hooray': 'Hooray!',
+  'realword': "Ooh, that's a real word too!",
+};
+
+const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+const flagged = new Set(JSON.parse(localStorage.getItem('sprouts-flagged') || '[]'));
+
+let manifest = {};
+try {
+  manifest = await (await fetch(AUDIO_BASE + 'manifest.json')).json();
+} catch (e) {
+  document.getElementById('loading').textContent = 'Could not load manifest.json — serve this over http (python3 -m http.server).';
+  throw e;
+}
+
+// Build the list of sections: [{title, items:[{cat,key,label,expected,thumb,file,dur}]}]
+const dur = (cat, key) => (manifest[cat]?.[key]?.dur ?? null);
+const frag = (key, expected) => ({
+  cat: 'fragments', key, label: key, expected, thumb: TILE(key),
+  file: `fragments/${key}.m4a`, dur: dur('fragments', key),
+});
+
+const onsetItems = Object.keys(ONSETS)
+  .filter((k) => manifest.fragments?.[k])
+  .map((k) => frag(k, `“${ONSETS[k].spoken}”`));
+const rimeItems = Object.keys(RIMES)
+  .filter((k) => manifest.fragments?.[k])
+  .map((k) => frag(k, `“${RIMES[k].spoken}”`));
+
+const wordItems = WORDS.filter((w) => manifest.words?.[w.word]).map((w) => ({
+  cat: 'words', key: w.word, label: w.word, expected: `“${cap(w.word)}!”`,
+  thumb: OBJ(w.word), file: `words/${w.word}.m4a`, dur: dur('words', w.word),
+}));
+const celebItems = WORDS.filter((w) => manifest.celebrate?.[w.word]).map((w) => ({
+  cat: 'celebrate', key: w.word, label: w.word, expected: `“You made ${w.word}!”`,
+  thumb: OBJ(w.word), file: `celebrate/${w.word}.m4a`, dur: dur('celebrate', w.word),
+}));
+const promptItems = WORDS.filter((w) => manifest.prompts?.[w.word]).map((w) => ({
+  cat: 'prompts', key: w.word, label: w.word, expected: `“Can you make ${w.word}?”`,
+  thumb: OBJ(w.word), file: `prompts/${w.word}.m4a`, dur: dur('prompts', w.word),
+}));
+const miscItems = Object.keys(manifest.misc || {}).map((k) => ({
+  cat: 'misc', key: k, label: k, expected: MISC_TEXT[k] ? `“${MISC_TEXT[k]}”` : '',
+  thumb: null, file: `misc/${k}.m4a`, dur: dur('misc', k),
+}));
+
+const SECTIONS = [
+  { title: `Beginning sounds — onsets (${onsetItems.length})`, items: onsetItems },
+  { title: `Ending chunks — rimes (${rimeItems.length})`, items: rimeItems },
+  { title: `Words (${wordItems.length})`, items: wordItems, collapsed: true },
+  { title: `Celebrations — “You made …!” (${celebItems.length})`, items: celebItems, collapsed: true },
+  { title: `Prompts — “Can you make …?” (${promptItems.length})`, items: promptItems, collapsed: true },
+  { title: `Misc phrases (${miscItems.length})`, items: miscItems, collapsed: true },
+];
+
+// ---- audio playback (one channel) ----
+let cur = null, curCard = null;
+function play(item, card) {
+  if (cur) { cur.pause(); cur.currentTime = 0; }
+  if (curCard) curCard.classList.remove('playing');
+  cur = new Audio(AUDIO_BASE + item.file);
+  curCard = card;
+  card.classList.add('playing');
+  cur.addEventListener('ended', () => card.classList.remove('playing'));
+  cur.addEventListener('error', () => { card.classList.remove('playing'); card.querySelector('.exp').textContent = '⚠️ clip failed to load'; });
+  cur.play().catch(() => {});
+}
+
+const fid = (it) => `${it.cat}/${it.key}`;
+function updateCount() {
+  const el = document.getElementById('count');
+  el.textContent = `${flagged.size} flagged`;
+  el.classList.toggle('has', flagged.size > 0);
+}
+function persist() { localStorage.setItem('sprouts-flagged', JSON.stringify([...flagged])); }
+
+// ---- render ----
+const main = document.getElementById('main');
+main.innerHTML = '';
+const allCards = [];
+for (const sec of SECTIONS) {
+  const s = document.createElement('section');
+  if (sec.collapsed) s.classList.add('collapsed');
+  const head = document.createElement('div');
+  head.className = 'sec-head';
+  head.innerHTML = `<span class="chev">▼</span> ${sec.title}`;
+  head.addEventListener('click', () => s.classList.toggle('collapsed'));
+  s.appendChild(head);
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  for (const it of sec.items) {
+    const card = document.createElement('div');
+    card.className = 'card' + (flagged.has(fid(it)) ? ' flagged' : '');
+    card.dataset.search = `${it.cat} ${it.key} ${it.expected}`.toLowerCase();
+    const thumb = it.thumb ? `<img class="thumb" src="${it.thumb}" alt="" onerror="this.style.visibility='hidden'">`
+                           : `<div class="thumb"></div>`;
+    card.innerHTML = `
+      <div class="hit">
+        ${thumb}
+        <div class="meta">
+          <div class="key">${it.label}</div>
+          <div class="exp">${it.expected}</div>
+          <div class="dur">${it.file}${it.dur != null ? ` · ${it.dur}s` : ''}</div>
+        </div>
+      </div>
+      <button class="flag" title="Flag as wrong">⚑</button>`;
+    card.querySelector('.hit').addEventListener('click', () => play(it, card));
+    card.querySelector('.flag').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = fid(it);
+      if (flagged.has(id)) flagged.delete(id); else flagged.add(id);
+      card.classList.toggle('flagged');
+      persist(); updateCount();
+    });
+    grid.appendChild(card);
+    allCards.push({ card, it });
+  }
+  s.appendChild(grid);
+  main.appendChild(s);
+}
+updateCount();
+
+// ---- search filter ----
+document.getElementById('search').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  for (const { card } of allCards) {
+    card.style.display = !q || card.dataset.search.includes(q) ? '' : 'none';
+  }
+});
+
+// ---- toolbar ----
+document.getElementById('expand').addEventListener('click', (e) => {
+  const secs = [...document.querySelectorAll('section')];
+  const anyCollapsed = secs.some((s) => s.classList.contains('collapsed'));
+  secs.forEach((s) => s.classList.toggle('collapsed', !anyCollapsed));
+  e.target.textContent = anyCollapsed ? 'Collapse all' : 'Expand all';
+});
+document.getElementById('clear').addEventListener('click', () => {
+  if (!flagged.size || !confirm('Clear all flags?')) return;
+  flagged.clear(); persist(); updateCount();
+  document.querySelectorAll('.card.flagged').forEach((c) => c.classList.remove('flagged'));
+});
+function flaggedReport() {
+  const byCat = {};
+  for (const { it } of allCards) {
+    if (flagged.has(fid(it))) (byCat[it.cat] ||= []).push(it);
+  }
+  const lines = [];
+  for (const cat of Object.keys(byCat)) {
+    lines.push(`# ${cat}`);
+    for (const it of byCat[cat]) lines.push(`${it.cat}/${it.key}\tassets/audio/${it.file}\texpected ${it.expected}`);
+    lines.push('');
+  }
+  return lines.join('\n').trim() || '(nothing flagged)';
+}
+const dlg = document.getElementById('dlg');
+document.getElementById('copy').addEventListener('click', () => {
+  const text = flaggedReport();
+  document.getElementById('dlgtext').value = text;
+  dlg.showModal();
+  navigator.clipboard?.writeText(text).catch(() => {});
+});
+document.getElementById('dlgcopy').addEventListener('click', () => {
+  const ta = document.getElementById('dlgtext');
+  ta.select(); navigator.clipboard?.writeText(ta.value).catch(() => document.execCommand('copy'));
+});
+document.getElementById('dlgclose').addEventListener('click', () => dlg.close());
+</script>
+</body>
+</html>
